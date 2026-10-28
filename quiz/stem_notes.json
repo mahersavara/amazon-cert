@@ -1,0 +1,7 @@
+{
+ "96": "Hình policy bị mất khi trích PDF. Nội dung policy: Statement 1 Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = 10.100.100.0/24. Statement 2 Deny ec2:*, Resource *, Condition StringNotEquals aws:RequestedRegion = us-east-1.",
+ "253": "Hình 2 policy bị mất khi trích PDF. Policy1: Allow iam:Get*, iam:List*, kms:List*, ec2:*, ds:*, logs:Get*, logs:Describe* trên mọi resource. Policy2: Deny ds:Delete* trên mọi resource.",
+ "423": "Hình JSON policy bị mất khi trích PDF. Câu này hỏi loại principal nào gắn được identity-based policy, nên không cần nội dung JSON để trả lời.",
+ "429": "Hình policy bị mất khi trích PDF. Statement 1: Allow ec2:*, Resource *, Condition StringEquals aws:RequestedRegion = us-east-1. Statement 2: Deny ec2:StopInstances và ec2:TerminateInstances, Resource *, Condition BoolIfExists aws:MultiFactorAuthPresent = false.",
+ "494": "Hình policy bị mất khi trích PDF. Nội dung policy: Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = [192.0.2.0/24, 203.0.113.0/24]."
+}

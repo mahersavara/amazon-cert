@@ -133,6 +133,9 @@ def show_question(q, pos, total, progress, hints=True):
     stat = f"đã làm {p['attempts']} lần, đúng {p['correct']}" if p else "chưa làm"
     rule(f"Câu {pos}/{total} · #{q['id']} · {stat}")
     print(wrap(q["question"]))
+    if q.get("note"):
+        print(color("\n🖼  Bổ sung phần hình bị mất:", "yellow", "bold"))
+        print(wrap(q["note"], "   ", "   "))
     print()
     for letter, text in q["options"].items():
         print(wrap(text, color(f"  {letter}. ", "bold", "yellow"), "     "))
@@ -173,6 +176,7 @@ def show_explanation(q, picked):
                     "yellow"))
 
     print(color("\n📋 Giải thích từng đáp án:", "cyan", "bold"))
+    noted = set()  # a service note is shown once, under the first option naming it
     for letter, text in q["options"].items():
         if letter in answer:
             mark, tone, verdict = "✔", "green", "ĐÚNG"
@@ -183,11 +187,20 @@ def show_explanation(q, picked):
         print(wrap(text, color(f"  {mark} {letter}. ", tone, "bold"), "      "))
         print(color(f"      → {verdict}", tone))
         for name, note in services_in(text):
-            print(wrap(f"{name}: {note}", color("      • ", "dim"), "        "))
+            if name not in noted:
+                noted.add(name)
+                print(wrap(f"{name}: {note}", color("      • ", "dim"), "        "))
 
-    if q["explanation"]:
-        label = "bổ sung" if q.get("manual") else "nguồn"
-        print(color(f"\n📖 Giải thích chi tiết ({label}):", "cyan", "bold"))
+    if q.get("manual"):
+        print(color("\n📖 Giải thích (tiếng Việt):", "cyan", "bold"))
+        print(wrap(q["explanation"], "   ", "   "))
+    elif q.get("explanation_vi"):
+        print(color("\n📖 Giải thích (tiếng Việt):", "cyan", "bold"))
+        print(wrap(q["explanation_vi"], "   ", "   "))
+        print(color("\n📄 Giải thích gốc (tiếng Anh):", "dim", "bold"))
+        print(color(wrap(q["explanation"], "   ", "   "), "dim"))
+    elif q["explanation"]:
+        print(color("\n📖 Giải thích chi tiết (nguồn, tiếng Anh):", "cyan", "bold"))
         print(wrap(q["explanation"], "   ", "   "))
     print()
 

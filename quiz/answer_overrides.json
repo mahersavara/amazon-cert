@@ -109,7 +109,7 @@
   "answer": [
    "C"
   ],
-  "explanation": "Đề gốc kèm ảnh nội dung Policy1/Policy2 (bị mất khi trích PDF). Theo đáp án phổ biến: Policy1 cho phép rộng (iam/ec2/ds/logs), Policy2 Deny tường minh các thao tác xóa IAM user, directory và CloudWatch Logs. Explicit Deny luôn thắng Allow → chỉ còn xóa EC2 instance. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny."
+  "explanation": "Policy1 chỉ cho xem (Get/List/Describe) với IAM và CloudWatch Logs, nhưng cho toàn quyền ec2:* và ds:*. Policy2 Deny tường minh ds:Delete*. Explicit Deny luôn thắng Allow → không xóa được directory (B). A: IAM chỉ có Get/List, không có DeleteUser. D: Logs chỉ có Get/Describe. Còn lại xóa EC2 instance (ec2:*) → C. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny."
  },
  "257": {
   "answer": [
@@ -421,5 +421,76 @@
    "C"
   ],
   "explanation": "Ít thay đổi app + tăng resiliency: web tier lên EC2 Auto Scaling sau ALB (nhiều AZ), DB MySQL lên RDS Multi-AZ (cùng engine, failover tự động). B DB trên ASG sau NLB không đồng bộ dữ liệu giữa các node. D Lambda và E DynamoDB đều phải viết lại code."
+ },
+ "110": {
+  "answer": [
+   "C",
+   "D"
+  ],
+  "explanation": "Upload chậm vì ảnh phải đi qua web server rồi mới resize. C: trình duyệt upload thẳng lên S3 bằng presigned URL → web server không còn gánh việc nhận file. D: S3 Event Notification gọi Lambda resize sau khi upload → tách rời (decouple), serverless. B (đáp án của file nguồn): web server vẫn nhận toàn bộ ảnh rồi mới đẩy lên S3 → vẫn chậm, chưa giảm coupling; đa số tài liệu chọn C+D. A: Glacier là lưu trữ lạnh. E: resize theo lịch → không xử lý ngay."
+ },
+ "156": {
+  "answer": [
+   "A",
+   "E"
+  ],
+  "explanation": "Gom dữ liệu batch + stream vào một chỗ, stage ở S3, ít vận hành. E: Lake Formation blueprints + Glue crawler/ETL tự đưa dữ liệu vào S3 dạng Parquet (data lake). A: Athena query một lần trực tiếp trên S3, QuickSight làm dashboard KPI. C (đáp án của file nguồn): tự viết Lambda chuyển từng bản ghi sang Redshift → nhiều code, không stage vào S3 như đề yêu cầu. B: Kinesis Data Analytics cho dữ liệu streaming, không dùng cho query một lần. D: nhiều cụm OpenSearch → tốn vận hành."
+ },
+ "534": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "30 ngày đầu phân tích thường xuyên → để S3 Standard. 60 ngày tiếp chỉ để backup, hiếm khi đọc → Glacier Flexible Retrieval (rẻ hơn Standard-IA nhiều). Xóa ở ngày 90. Glacier tính phí tối thiểu 90 ngày, nên object xóa sớm vẫn bị tính thêm 30 ngày, nhưng tổng vẫn rẻ hơn Standard-IA. B (đáp án của file nguồn): dùng Standard-IA cho 60 ngày backup → đắt hơn, còn bước \"chuyển Glacier sau 90 ngày\" là thừa vì object bị xóa đúng ngày 90. A: Standard → Standard không tiết kiệm gì. D: One Zone-IA kém bền, và cũng có bước Glacier thừa."
+ },
+ "125": {
+  "answer": [
+   "A",
+   "E"
+  ],
+  "options": {
+   "A": "Use an Auto Scaling group to launch the EC2 instances in private subnets. Deploy an RDS Multi-AZ DB instance in private subnets.",
+   "B": "Configure a VPC with two private subnets and two NAT gateways across two Availability Zones. Deploy an Application Load Balancer in the private subnets.",
+   "C": "Use an Auto Scaling group to launch the EC2 instances in public subnets across two Availability Zones. Deploy an RDS Multi-AZ DB instance in private subnets.",
+   "D": "Configure a VPC with one public subnet, one private subnet, and two NAT gateways across two Availability Zones. Deploy an Application Load Balancer in the public subnet.",
+   "E": "Configure a VPC with two public subnets, two private subnets, and two NAT gateways across two Availability Zones. Deploy an Application Load Balancer in the public subnets."
+  },
+  "explanation": "Lưu ý: PDF gốc in nhầm 2 phương án cùng chữ D; phương án thứ hai được đổi thành E. EC2 và RDS không public → đặt EC2 (ASG) và RDS Multi-AZ trong private subnet (A). EC2 cần ra internet để thanh toán, HA → VPC có 2 public + 2 private subnet ở 2 AZ, mỗi AZ một NAT gateway, ALB đặt ở public subnet để nhận traffic từ internet (E). B: ALB ở private subnet thì người dùng internet không vào được. C: EC2 ở public subnet là lộ ra internet. D: chỉ 1 public + 1 private subnet → không HA (ALB cần ít nhất 2 AZ)."
+ },
+ "145": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Cần scale \"liền mạch\" theo tải và rẻ nhất → tách DB ra Aurora MySQL (managed, scale tốt), web chạy từ AMI trong Auto Scaling group dùng Spot Fleet (rẻ), ALB phân tải. A (đáp án của file nguồn): chỉ thêm đúng 1 instance On-Demand cố định → không tự scale khi tải tăng tiếp. B: Route 53 weighted routing không kiểm tra tải, không tự scale. C: đổi instance type phải stop máy → có downtime, không \"seamless\"."
+ },
+ "231": {
+  "answer": [
+   "B"
+  ],
+  "question": "An application runs on an Amazon EC2 instance that has an Elastic IP address in VPC A. The application requires access to a database in VPC B. Both VPCs are in the same AWS account.\nWhich solution will provide the required access MOST securely?",
+  "options": {
+   "A": "Create a DB instance security group that allows all traffic from the public IP address of the application server in VPC A.",
+   "B": "Configure a VPC peering connection between VPC A and VPC B.",
+   "C": "Make the DB instance publicly accessible. Assign a public IP address to the DB instance.",
+   "D": "Launch an EC2 instance with an Elastic IP address into VPC B. Proxy all requests through the new EC2 instance."
+  },
+  "explanation": "Lưu ý: bản trích PDF cũ hiểu nhầm \"VPC A\"/\"VPC B\" trong đề là phương án A/B; đề và phương án đã được sửa theo PDF. Hai VPC cùng account, an toàn nhất → VPC peering: traffic đi bằng IP private trên mạng AWS, không ra internet. A: cho phép theo IP public nghĩa là traffic đi qua internet. C: mở DB ra internet là kém an toàn nhất. D: thêm proxy EC2 public → thêm điểm tấn công và single point of failure."
+ },
+ "328": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Lượng đơn tăng vọt đột ngột, backend vốn xử lý bất đồng bộ, yêu cầu MỌI request được xử lý → đặt SQS nhận request từ website; worker EC2 xử lý dần, không mất đơn nào. CloudFront cache phần nội dung tĩnh. B (đáp án của file nguồn): Auto Scaling cần vài phút mới thêm được instance, nên với tải tăng vọt đột ngột vẫn có thể rơi request; đa số tài liệu chọn D. A: tăng số EC2 cố định không theo kịp tải đột biến. C: ElastiCache không đặt trước ALB được, và không giữ request."
+ },
+ "536": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Cần HA + cho nhóm data scientist đọc gần real-time mà không ảnh hưởng production, rẻ nhất → RDS Multi-AZ DB cluster: 1 writer + 2 standby đọc được (tổng 3 instance), cấp reader endpoint cho data scientist. C (đáp án của file nguồn): Multi-AZ instance (1 primary + 1 standby không đọc được) cộng thêm 2 read replica → 4 instance, đắt hơn; đa số tài liệu chọn D. A: query nặng vẫn chạy trên production. B: standby của Multi-AZ instance không đọc được."
+ },
+ "667": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "Truy cập S3 không qua internet từ cả trong Region lẫn từ on-prem (qua Direct Connect) → interface endpoint cho S3 (PrivateLink): có IP private trong VPC nên on-prem gọi được qua Direct Connect. A (đáp án của file nguồn): gateway endpoint chỉ dùng được bên trong VPC, traffic từ on-prem đi qua Direct Connect không dùng được gateway endpoint. Giải thích của nguồn nói interface endpoint không dành cho S3 là sai: S3 hỗ trợ interface endpoint từ năm 2021. B: Transit Gateway không kết nối tới S3. D: KMS là mã hóa, không phải đường mạng."
  }
 }
