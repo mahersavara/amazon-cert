@@ -76,6 +76,12 @@ class DataTest(unittest.TestCase):
                    if not (q.get("stem_vi", {}).get("tinh_huong") and q["stem_vi"].get("dich"))]
         self.assertEqual(missing, [])
 
+    def test_every_option_translated(self):
+        bad = [q["id"] for q in QUESTIONS
+               if sorted(q.get("options_vi", {})) != sorted(q["options"])
+               or not all(v.strip() for v in q.get("options_vi", {}).values())]
+        self.assertEqual(bad, [])
+
     def test_lost_images_described(self):
         for qid in ("96", "253", "423", "429", "494"):
             with self.subTest(id=qid):
@@ -149,7 +155,16 @@ class CliTest(unittest.TestCase):
         self.assertLess(out.index("Dịch đề"), out.index("ĐÚNG"))
         self.assertIn("Tình huống", out)
         self.assertIn("Từ khóa trong đề", out)
+        self.assertIn("Dịch đáp án", out)
         self.assertEqual(progress["1"]["correct"], 1)
+
+    def test_refresh_hotkey_redraws_bare_question(self):
+        out, _ = self.run_quiz("6\n1\nv\nzz\nr\nA\n\nq\nq\n")
+        # After r the screen is cleared and the stem is printed again, without the translation
+        after = out[out.rindex("Nhập đúng"):].split("\033[2J", 1)[1]
+        self.assertIn(BY_ID[1]["question"][:40], after.replace("\n", " "))
+        self.assertNotIn("Dịch đề", after.split("Chọn (")[0])
+        self.assertIn("ĐÚNG", after)
 
     def test_exam_submit_early(self):
         # The first exam question is random, so quit at once instead of answering it

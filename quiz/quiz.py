@@ -170,6 +170,12 @@ def show_translation(q):
     print(wrap(vi["tinh_huong"], "   ", "   "))
     print(color("\n🇻🇳 Dịch đề:", "cyan", "bold"))
     print(wrap(vi["dich"], "   ", "   "))
+    options_vi = q.get("options_vi", {})
+    if options_vi:
+        print(color("\n🔠 Dịch đáp án:", "cyan", "bold"))
+        for letter in q["options"]:
+            print(wrap(options_vi.get(letter, q["options"][letter]),
+                       color(f"  {letter}. ", "bold", "yellow"), "     "))
     print()
 
 
@@ -242,15 +248,20 @@ def show_explanation(q, picked):
 
 # ---------- input ----------
 
-def read_answer(q, allow_hint=True):
-    """Return list of letters, or 'skip' / 'quit'."""
+def read_answer(q, allow_hint=True, redraw=None):
+    """Return list of letters, or 'skip' / 'quit'. redraw() repaints the bare question for 'r'."""
     valid = list(q["options"])
     k = q["choose"]
     extra = ", h=gợi ý dịch vụ" if allow_hint else ""
+    extra += ", r=làm mới" if redraw else ""
     while True:
         raw = ask(f"Chọn ({valid[0]}-{valid[-1]}{', nhập ' + str(k) + ' chữ' if k > 1 else ''}"
                   f", v=dịch đề, k=từ khóa{extra}, s=bỏ qua, q=về menu): "
                   ).upper().replace(",", "").replace(" ", "")
+        # Clears translation/vocabulary/error output, keeping only the question and options
+        if raw in ("R", "CLS", "CLEAR") and redraw:
+            redraw()
+            continue
         if raw == "Q":
             return "quit"
         if raw == "S":
@@ -277,7 +288,7 @@ def practice(questions, progress, title):
     total, score, done = len(questions), 0, 0
     for i, q in enumerate(questions, 1):
         show_question(q, i, total, progress)
-        picked = read_answer(q)
+        picked = read_answer(q, redraw=lambda: show_question(q, i, total, progress))
         if picked == "quit":
             break
         if picked == "skip":
@@ -306,9 +317,14 @@ def exam(all_q, progress):
         if left <= 0:
             print(color("⏰ Hết giờ!", "red", "bold"))
             break
-        show_question(q, i, len(qs), progress, hints=False)
-        print(color(f"⏱ Còn {left // 60} phút {left % 60:02d} giây", "yellow"))
-        ans = read_answer(q, allow_hint=False)
+
+        def redraw():
+            show_question(q, i, len(qs), progress, hints=False)
+            left = max(0, int(deadline - time.time()))
+            print(color(f"⏱ Còn {left // 60} phút {left % 60:02d} giây", "yellow"))
+
+        redraw()
+        ans = read_answer(q, allow_hint=False, redraw=redraw)
         if ans == "quit":
             if ask("Nộp bài luôn? (y/n): ").lower() == "y":
                 break
