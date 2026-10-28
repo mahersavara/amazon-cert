@@ -29,10 +29,11 @@ Progress is saved to `quiz/progress.json` (gitignored).
 | File | Role |
 |---|---|
 | `quiz/quiz.py` | The app (menu, modes, progress) |
-| `quiz/aws_glossary.py` | Vietnamese notes per AWS service + requirement keyword hints |
+| `quiz/aws_glossary.py` | Vietnamese notes per AWS service, requirement keyword hints, and `TERMS` (171 general/exam terms, hotkey `k`) |
 | `quiz/build_data.py` | Builds `questions.json` from the source PDF + solution txt |
 | `quiz/answer_overrides.json` | 76 hand-verified answers + Vietnamese explanations; can also replace a stem or options the PDF got wrong |
 | `quiz/explanations_vi.json` | Vietnamese explanations for the other 607 questions (source answer kept) |
+| `quiz/stems_vi.json` | Vietnamese scenario summary + full translation for every stem (hotkey `v`) |
 | `quiz/stem_notes.json` | Text descriptions of policy images lost in extraction (#96, #253, #423, #429, #494), shown with the question |
 | `quiz/test_quiz.py` | Data integrity, glossary and piped-input CLI tests |
 | `quiz/questions.json` | Generated question bank (683 questions), committed |
@@ -103,3 +104,22 @@ Results:
   `questions.json`, that hints and service notes match correctly, and that piped CLI runs complete
   without a traceback.
 - Both original smoke tests still exit 0 with no traceback.
+
+## Follow-up: translate + keyword hotkeys
+
+While answering, two new keys work in every mode, the timed exam included (they only translate and
+define; they never reveal the answer):
+
+- `v`: "🧭 Tình huống" (a one-line summary of the scenario and what the question optimizes for)
+  and "🇻🇳 Dịch đề" (the full stem in Vietnamese). `d` was not used because it clashes with
+  option D.
+- `k`: "🔤 Từ khóa trong đề và đáp án" lists each matched term with its Vietnamese meaning
+  (`TERMS` in `aws_glossary.py`, median 6 terms per question), then the AWS services named in
+  the stem.
+
+The translations live in `quiz/stems_vi.json` (683/683) and are merged as `stem_vi` by
+`build_data.py`. Stems missing their last sentence in the PDF (#232, #460, #467, #473) carry a note
+with the implied question; the lost-image stems point to the restored policy note.
+
+Results: `build_data.py` → `... | translated stem: 683`; `python quiz/test_quiz.py` → 19 tests OK
+(added: every stem translated, term matching, `v`/`k` in the CLI); both smoke tests exit 0.
