@@ -17,6 +17,7 @@ OUT = ROOT / "questions.json"
 OVERRIDES = ROOT / "answer_overrides.json"
 EXPLANATIONS_VI = ROOT / "explanations_vi.json"
 STEM_NOTES = ROOT / "stem_notes.json"
+STEMS_VI = ROOT / "stems_vi.json"
 
 LETTERS = "ABCDEF"
 WORD = re.compile(r"[a-z0-9]+")
@@ -144,6 +145,7 @@ def main():
     overrides = json.loads(OVERRIDES.read_text(encoding="utf-8")) if OVERRIDES.exists() else {}
     vi = json.loads(EXPLANATIONS_VI.read_text(encoding="utf-8")) if EXPLANATIONS_VI.exists() else {}
     notes = json.loads(STEM_NOTES.read_text(encoding="utf-8")) if STEM_NOTES.exists() else {}
+    stems_vi = json.loads(STEMS_VI.read_text(encoding="utf-8")) if STEMS_VI.exists() else {}
     out, low = [], []
     for num in sorted(pdf_q):
         q = pdf_q[num]
@@ -170,6 +172,9 @@ def main():
         # Describes a policy image the PDF extraction lost, shown with the question
         if str(num) in notes:
             item["note"] = notes[str(num)]
+        # Vietnamese translation + scenario summary of the stem, shown with the "v" key
+        if str(num) in stems_vi:
+            item["stem_vi"] = stems_vi[str(num)]
         if not item["confident"]:
             low.append(num)
         out.append(item)
@@ -177,7 +182,8 @@ def main():
     missing = [q["id"] for q in out if not q["answer"]]
     vietnamese = sum(bool(q.get("manual") or q.get("explanation_vi")) for q in out)
     print(f"questions: {len(out)} | with answer: {len(out) - len(missing)} | "
-          f"low-confidence: {len(low)} | vietnamese explanation: {vietnamese}")
+          f"low-confidence: {len(low)} | vietnamese explanation: {vietnamese} | "
+          f"translated stem: {sum('stem_vi' in q for q in out)}")
     print("no solution:", missing[:50])
     print("low-confidence:", low[:80])
 

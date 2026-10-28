@@ -11,8 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from aws_glossary import KEYWORDS, SERVICES  # noqa: E402
-from quiz import requirement_hints, services_in  # noqa: E402
+from aws_glossary import KEYWORDS, SERVICES, TERMS  # noqa: E402
+from quiz import requirement_hints, services_in, terms_in  # noqa: E402
 
 
 def load(name):
@@ -71,6 +71,11 @@ class DataTest(unittest.TestCase):
         missing = [q["id"] for q in QUESTIONS if not (q.get("manual") or q.get("explanation_vi"))]
         self.assertEqual(missing, [])
 
+    def test_every_question_has_translated_stem(self):
+        missing = [q["id"] for q in QUESTIONS
+                   if not (q.get("stem_vi", {}).get("tinh_huong") and q["stem_vi"].get("dich"))]
+        self.assertEqual(missing, [])
+
     def test_lost_images_described(self):
         for qid in ("96", "253", "423", "429", "494"):
             with self.subTest(id=qid):
@@ -79,7 +84,7 @@ class DataTest(unittest.TestCase):
 
 class GlossaryTest(unittest.TestCase):
     def test_patterns_compile(self):
-        for pattern, *_ in SERVICES + KEYWORDS:
+        for pattern, *_ in SERVICES + KEYWORDS + TERMS:
             re.compile(pattern)
 
     def test_service_notes(self):
@@ -92,6 +97,12 @@ class GlossaryTest(unittest.TestCase):
         self.assertTrue(requirement_hints("with the LEAST operational overhead?"))
         self.assertTrue(requirement_hints("Which solution is the MOST operationally efficient?"))
         self.assertFalse(requirement_hints("The company uses EC2 in order to run jobs."))
+
+    def test_terms(self):
+        found = [t for t, _ in terms_in("Which solution is the MOST cost-effective with high availability?")]
+        self.assertIn("cost-effective", found)
+        self.assertNotIn("block storage", [t for t, _ in terms_in("Block the attacker's IP address")])
+        self.assertNotIn("elastic / elasticity", [t for t, _ in terms_in("Use Elastic Load Balancing")])
 
     def test_hint_coverage(self):
         without = [q["id"] for q in QUESTIONS if not requirement_hints(q["question"])]
@@ -132,6 +143,13 @@ class CliTest(unittest.TestCase):
     def test_service_note_not_repeated(self):
         out, _ = self.run_quiz("6\n96\nA\n\nq\nq\n")
         self.assertEqual(out.count("EC2: Máy ảo"), 1)
+
+    def test_translate_and_terms_hotkeys(self):
+        out, progress = self.run_quiz("6\n1\nv\nk\nA\n\nq\nq\n")
+        self.assertLess(out.index("Dịch đề"), out.index("ĐÚNG"))
+        self.assertIn("Tình huống", out)
+        self.assertIn("Từ khóa trong đề", out)
+        self.assertEqual(progress["1"]["correct"], 1)
 
     def test_exam_submit_early(self):
         # The first exam question is random, so quit at once instead of answering it

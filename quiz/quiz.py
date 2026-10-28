@@ -13,7 +13,7 @@ import textwrap
 import time
 from pathlib import Path
 
-from aws_glossary import KEYWORDS, SERVICES
+from aws_glossary import KEYWORDS, SERVICES, TERMS
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "questions.json"
@@ -161,6 +161,41 @@ def show_service_hints(q):
     print()
 
 
+def show_translation(q):
+    vi = q.get("stem_vi")
+    if not vi:
+        print(color("  (Chưa có bản dịch cho câu này.)", "yellow"))
+        return
+    print(color("\n🧭 Tình huống:", "cyan", "bold"))
+    print(wrap(vi["tinh_huong"], "   ", "   "))
+    print(color("\n🇻🇳 Dịch đề:", "cyan", "bold"))
+    print(wrap(vi["dich"], "   ", "   "))
+    print()
+
+
+def terms_in(text):
+    """Return [(term, meaning)] for exam vocabulary found in text, in glossary order."""
+    return [(term, meaning) for pattern, term, meaning in TERMS if re.search(pattern, text, re.I)]
+
+
+def show_terms(q):
+    text = q["question"] + "\n" + "\n".join(q["options"].values())
+    found = terms_in(text)
+    services = services_in(q["question"])
+    if not found and not services:
+        print(color("  (Không tìm thấy từ khóa trong bảng thuật ngữ.)", "yellow"))
+        return
+    if found:
+        print(color("\n🔤 Từ khóa trong đề và đáp án:", "cyan", "bold"))
+        for term, meaning in found:
+            print(wrap(f"{term}: {meaning}", "   • ", "     "))
+    if services:
+        print(color("\n☁️  Dịch vụ AWS nhắc tới trong đề:", "cyan", "bold"))
+        for name, note in services:
+            print(wrap(f"{name}: {note}", "   • ", "     "))
+    print()
+
+
 def show_explanation(q, picked):
     answer = q["answer"]
     if not answer:
@@ -214,11 +249,19 @@ def read_answer(q, allow_hint=True):
     extra = ", h=gợi ý dịch vụ" if allow_hint else ""
     while True:
         raw = ask(f"Chọn ({valid[0]}-{valid[-1]}{', nhập ' + str(k) + ' chữ' if k > 1 else ''}"
-                  f"{extra}, s=bỏ qua, q=về menu): ").upper().replace(",", "").replace(" ", "")
+                  f", v=dịch đề, k=từ khóa{extra}, s=bỏ qua, q=về menu): "
+                  ).upper().replace(",", "").replace(" ", "")
         if raw == "Q":
             return "quit"
         if raw == "S":
             return "skip"
+        # Language help (translation, vocabulary) is allowed in exam mode too
+        if raw == "V":
+            show_translation(q)
+            continue
+        if raw == "K":
+            show_terms(q)
+            continue
         if raw == "H" and allow_hint:
             show_service_hints(q)
             continue
