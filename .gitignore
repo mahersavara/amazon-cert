@@ -1,0 +1,4 @@
+*.pyc
+quiz/progress.json
+.env
+.env.*

@@ -1,0 +1,32 @@
+# Floci local AWS emulator for SAA-C03 practice.
+# Start:  docker compose -f floci/compose.yaml up -d
+# Stop:   docker compose -f floci/compose.yaml down        (add -v to wipe saved state)
+services:
+  floci:
+    # Pinned release; bump deliberately instead of tracking :latest.
+    image: floci/floci:2.3.0
+    container_name: floci
+    ports:
+      # Bound to loopback only so nothing on the LAN can reach the emulator.
+      - "127.0.0.1:4566:4566"          # all AWS APIs + web console entry (/_floci/ui)
+      - "127.0.0.1:7001-7020:7001-7020"  # RDS proxy ports (one per DB instance)
+      - "127.0.0.1:8080-8089:8080-8089"  # ALB/NLB listener ports: create listeners on 8080-8089
+    volumes:
+      # Needed for real containers: EC2, RDS, Lambda, ECS, web console.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - floci-data:/app/data
+    environment:
+      FLOCI_HOSTNAME: floci
+      FLOCI_DEFAULT_REGION: us-east-1
+      # Keep resources across restarts.
+      FLOCI_STORAGE_MODE: persistent
+      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+      # Spawned containers (Lambda, RDS, EC2) join this compose network.
+      FLOCI_SERVICES_DOCKER_NETWORK: floci_default
+      # Docker Desktop's socket is root-owned inside the VM.
+      FLOCI_RUN_AS_ROOT: "true"
+      # Web console sidecar only on loopback.
+      FLOCI_SERVICES_UI_BIND_ADDRESS: 127.0.0.1
+
+volumes:
+  floci-data:

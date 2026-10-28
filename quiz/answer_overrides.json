@@ -1,0 +1,425 @@
+{
+ "191": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "Report chạy trên primary làm nghẽn order → tách sang read replica. B sai: replica chỉ đọc, app ghi order không thể ghi vào replica. C: đổi DB quá lớn. D: vi phạm yêu cầu không cản nhân viên query giờ hành chính."
+ },
+ "192": {
+  "answer": [
+   "B",
+   "E"
+  ],
+  "explanation": "E: Textract đọc chữ từ ảnh scan, Comprehend Medical trích thông tin y tế, Lambda chạy theo event upload → serverless, scale tốt. B: lưu S3 + Athena query SQL serverless. A/C dùng EC2 tự quản → kém hiệu quả vận hành. D sai dịch vụ: Rekognition là phân tích ảnh/vật thể, Transcribe Medical là speech-to-text."
+ },
+ "193": {
+  "answer": [
+   "B"
+  ],
+  "explanation": "Giảm số lượt đọc DB → cache. ElastiCache for Redis hỗ trợ replication + Multi-AZ failover → HA. D Memcached không có replication/HA. A read replica không giảm số lượt đọc, chỉ chia tải. C Route 53 cache DNS, không liên quan dữ liệu."
+ },
+ "194": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "DB tự cài trên EC2 cần HA + failover tự động → 2 instance ở 2 AZ, cluster + replication. B/D chỉ 1 instance, khôi phục bằng AMI/recovery → có downtime, không phải failover. C khác Region: phức tạp, failover thủ công, thừa so với yêu cầu."
+ },
+ "195": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "Đơn hàng không được mất khi hệ thống lỗi → đặt SQS làm buffer bền vững; message còn trong queue tới khi xử lý xong, instance khác tiếp tục. B ALB không lưu request khi backend chết. A/D không đảm bảo tin nhắn được giữ lại và xử lý lại."
+ },
+ "196": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "DynamoDB TTL tự xóa item hết hạn, miễn phí (không tốn WCU), chỉ cần thêm 1 attribute timestamp → chi phí + công sức thấp nhất. B/C phải viết và vận hành code xóa. A redeploy stack sẽ mất toàn bộ dữ liệu."
+ },
+ "197": {
+  "answer": [
+   "B",
+   "E"
+  ],
+  "explanation": "Ít thay đổi code: B rehost .NET lên Elastic Beanstalk (Windows/.NET platform) Multi-AZ → HA. E DMS chuyển Oracle → RDS for Oracle Multi-AZ (cùng engine, không đổi code). A refactor serverless = sửa nhiều. C Amazon Linux không chạy .NET Framework trên Windows. D DynamoDB đổi sang NoSQL = viết lại tầng dữ liệu."
+ },
+ "198": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Không đổi deployment method (Kubernetes) → EKS. Ít vận hành → Fargate (không quản lý node). MongoDB không đổi code → DocumentDB (tương thích MongoDB). A/B dùng ECS = đổi cách deploy; B/C dùng DynamoDB = đổi code."
+ },
+ "199": {
+  "answer": [
+   "B"
+  ],
+  "explanation": "Transcribe chuyển giọng nói thành transcript, có speaker diarization (nhận diện nhiều người nói). Transcript lưu S3 (giữ 7 năm, có thể Lifecycle) và Athena query trực tiếp. Rekognition = ảnh/video, Translate = dịch, Textract = đọc chữ từ tài liệu."
+ },
+ "200": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Đã dùng Cognito → Cognito user pool authorizer trên API Gateway xác thực token có sẵn, không viết code. A/B/C đều cần Lambda tự viết → tốn công. API key (B) không phải cơ chế xác thực người dùng."
+ },
+ "207": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "DynamoDB hết throughput → request bị mất. Đặt SQS làm buffer: API ghi vào queue, Lambda đọc và ghi DynamoDB với tốc độ chịu được → không mất request. A throttling sẽ từ chối request của user hiện tại. B DAX là cache đọc, không buffer ghi. C index không tăng khả năng ghi."
+ },
+ "210": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "SQS tách 2 bước, không mất dữ liệu khi scale. Scale theo metric backlog per instance (số message / số instance) là cách AWS khuyến nghị cho ASG đọc queue → scale đúng tải, tối ưu tài nguyên. A đặt min theo peak = lãng phí. B tạo thêm ASG là sai cách. C queue không gửi notification để scale."
+ },
+ "219": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Ứng dụng in-memory → đổi M5 sang R5 (memory optimized). Sửa qua CloudFormation = IaC, nhất quán. CloudWatch KHÔNG có sẵn metric memory của EC2 → phải cài CloudWatch agent (C sai ở điểm này). A T3 burstable + sửa tay console. B scale thủ công + app stateful."
+ },
+ "224": {
+  "answer": [
+   "C",
+   "E"
+  ],
+  "explanation": "Multivalue answer routing trả về nhiều IP healthy ngẫu nhiên → traffic tới mọi instance ngẫu nhiên + có health check. 4 instance chia đều 2 AZ (2+2) → mất 1 AZ vẫn còn 50% capacity, cân bằng. Failover chỉ active-passive; weighted cần đặt trọng số, không phải ngẫu nhiên; D chia lệch 2+1."
+ },
+ "235": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "Oracle → Aurora PostgreSQL khác engine → cần SCT chuyển schema. Giữ đồng bộ suốt nhiều tháng → DMS full load + CDC cho tất cả bảng. Lượng đọc/ghi lớn → replication instance memory optimized (DMS dùng nhiều RAM cho CDC). DataSync dành cho file, không phải DB. D chỉ chọn bảng lớn nhất → thiếu dữ liệu."
+ },
+ "247": {
+  "answer": [
+   "C",
+   "E"
+  ],
+  "explanation": "Điều kiện tạo read replica RDS MySQL: phải bật automatic backups (retention > 0). Nên để transaction dài chạy xong trên source trước khi tạo replica để tránh trễ/khóa. A binlog do RDS tự quản khi bật backup. B failover priority dành cho Aurora. D global table là DynamoDB."
+ },
+ "249": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "SMB + fully managed → FSx for Windows File Server. A Volume Gateway cung cấp iSCSI block, không phải SMB share. B Tape Gateway để backup tape. C tự dựng file server trên EC2 → không managed."
+ },
+ "253": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "Đề gốc kèm ảnh nội dung Policy1/Policy2 (bị mất khi trích PDF). Theo đáp án phổ biến: Policy1 cho phép rộng (iam/ec2/ds/logs), Policy2 Deny tường minh các thao tác xóa IAM user, directory và CloudWatch Logs. Explicit Deny luôn thắng Allow → chỉ còn xóa EC2 instance. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny."
+ },
+ "257": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "CloudWatch metric stream đẩy metric gần real-time sang Kinesis Data Firehose → S3, hoàn toàn serverless, không đụng tới quá trình launch EC2. B EMR không serverless. C chạy theo lịch → không near-real-time. D bootstrap script làm chậm launch instance."
+ },
+ "273": {
+  "answer": [
+   "B"
+  ],
+  "explanation": "DB cập nhật latency thấp nhất ở Region khác → Aurora Global Database (replication < 1s). Hạ tầng chạy công suất giảm và scale lên được → warm standby (RTO thấp hơn pilot light, vì pilot light gần như không chạy app). RDS Multi-AZ chỉ trong 1 Region → không phải DR liên Region."
+ },
+ "283": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Cần 1 file system cho cả Linux (NFS) và Windows (SMB) → FSx for NetApp ONTAP hỗ trợ multi-protocol, bỏ được việc đồng bộ 2 hệ thống. Không đổi code → giữ app trên EC2 Linux/Windows. A/B/C đều đòi đổi code (Lambda, S3 API, SQS)."
+ },
+ "298": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "Subnet chỉ nằm trong 1 AZ (B/D sai vì subnet không trải qua nhiều AZ). Mỗi AZ 1 subnet, ASG phân bổ qua 2 AZ, RDS bật Multi-AZ (standby đồng bộ, failover tự động). A 'kết nối DB tới mỗi network' không tạo HA cho DB."
+ },
+ "301": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "DataSync chuyển trực tiếp vào FSx for Windows, tối ưu tốc độ, có bandwidth throttling để hạn chế ảnh hưởng mạng chung. 30 TB qua 1 Gbps ~3 ngày → kịp 5 ngày. Snowcone dung lượng nhỏ (8-14 TB) và mất thời gian vận chuyển. FSx File Gateway dùng cho truy cập cache on-prem, không phải migrate. Transfer Family = SFTP/FTP."
+ },
+ "308": {
+  "answer": [
+   "B",
+   "C"
+  ],
+  "explanation": "Consolidated billing (payer) account xem được khuyến nghị Trusted Advisor về RI của mọi account liên kết cùng lúc. Instance On-Demand chạy liên tục 90 ngày → check RDS Reserved Instance Optimization (mua RI để giảm giá). D Idle check không hợp vì DB đang active. E là Redshift, không phải RDS."
+ },
+ "311": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "SNS + SQS fan-out với message filtering theo quote type: SQS giữ message (tới 14 ngày) → không mất, xử lý trong 24h, managed hoàn toàn. A Kinesis cần quản lý shard/KCL. B SNS → Lambda không có hàng đợi bền, lỗi có thể mất. D OpenSearch không phải hàng đợi."
+ },
+ "315": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Amazon Inspector quét lỗ hổng (CVE) trên EC2 và tạo finding; Lambda tự động tạo/gửi báo cáo. Shield = chống DDoS, Macie = dữ liệu nhạy cảm trên S3, GuardDuty = phát hiện mối đe dọa từ log, không quét lỗ hổng phần mềm."
+ },
+ "327": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "Lọc outbound theo domain/URL → AWS Network Firewall với domain list rule group, định tuyến từ subnet private qua firewall. B WAF chỉ bảo vệ inbound cho ALB/CloudFront/API GW. C security group không lọc theo URL (chỉ IP/port/SG). D ALB không xử lý traffic outbound."
+ },
+ "341": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Data lake đã dùng Lake Formation → dùng blueprint ingest DB vào S3, Lake Formation cấp quyền mức cột, QuickSight đọc qua Athena (tôn trọng quyền Lake Formation). B IAM policy và C bucket policy không làm được column-level. A EMR → overhead cao, không có quản lý quyền cột."
+ },
+ "366": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Usage plan + API key gắn với nhóm user trả phí → chỉ subscriber gọi được API premium, tính năng có sẵn của API Gateway. A caching/throttling không phân quyền. B WAF không biết ai có subscription. C IAM fine-grained trên DynamoDB phức tạp hơn nhiều."
+ },
+ "390": {
+  "answer": [
+   "B",
+   "D"
+  ],
+  "explanation": "Session cần lưu bền ngoài instance: DynamoDB (bền, serverless) hoặc ElastiCache Redis (có persistence/replication, rất nhanh). A sticky session gắn user vào 1 instance → instance chết mất session. C Cognito quản lý đăng nhập, không lưu session giao dịch. E Systems Manager không dùng cho việc này."
+ },
+ "402": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "Kinesis Data Streams mặc định giữ dữ liệu 24 giờ. App đọc cách ngày (48h) → dữ liệu cũ đã bị xóa. Tăng retention period (tới 365 ngày) giải quyết. B KPL và C thêm shard xử lý throughput ghi, không phải vấn đề ở đây. D versioning S3 không liên quan."
+ },
+ "414": {
+  "answer": [
+   "B"
+  ],
+  "explanation": "S3 File Gateway cung cấp network share (SMB/NFS); file ghi vào được upload lên S3 gần như ngay lập tức → near-real-time, không phải viết code. A chạy cuối ngày → không real-time. C/D phải viết ứng dụng/script → overhead."
+ },
+ "417": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "Compute Savings Plan áp dụng cho cả EC2 lẫn Lambda (EC2 Instance Savings Plan chỉ cho EC2). Lambda cần truy cập trực tiếp EC2 private → gắn Lambda vào chính private subnet đó (latency thấp). B public subnet không cho Lambda IP public. D VPC mặc định của Lambda không thấy EC2 private."
+ },
+ "434": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "Downtime ít nhất → hạ tầng đã chạy sẵn ở Region DR (ASG + LB), DynamoDB global table đồng bộ dữ liệu, Route 53 DNS failover tự động chuyển. B/C dựng khi cần → lâu. D tự viết alarm + Lambda cập nhật Route 53 = phức tạp và chậm hơn health check failover có sẵn."
+ },
+ "491": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "Yêu cầu at-least-once → SQS standard đủ (rẻ hơn FIFO, FIFO dành cho exactly-once + thứ tự). Dữ liệu thẻ → SSE-KMS; Lambda đọc queue mã hóa KMS cần quyền kms:Decrypt trên execution role. D sai vì không có 'encryption key invocation permission'. B/C FIFO đắt hơn không cần thiết."
+ },
+ "528": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Transfer Family cung cấp FTP managed (client không đổi) lưu thẳng vào S3. S3 event → Lambda xử lý từng file ngay khi tới (3-8 phút < 15 phút giới hạn Lambda), xóa sau khi xong → serverless, vận hành ít nhất. A/B chạy đêm → không 'càng sớm càng tốt'. C Transfer Family không lưu vào EBS, và S3 event không áp dụng cho EBS."
+ },
+ "539": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "Elastic Disaster Recovery replicate thay đổi ổ đĩa liên tục (RPO tính bằng giây), dạng pilot light chỉ chạy server staging nhẹ → rẻ; khôi phục trong vài phút → đạt RTO 60 phút. A Enterprise + active/active rất đắt. B warm standby RDS đắt hơn. D backup mỗi đêm → RPO 24h."
+ },
+ "543": {
+  "answer": [
+   "A",
+   "E"
+  ],
+  "explanation": "Savings Plan chỉ chia sẻ được giữa các account trong cùng Organization (consolidated billing). Tạo Organization từ account đang có Savings Plan, mời các account khác vào, rồi bật discount sharing trong billing preferences của management account. RAM không dùng để chia sẻ Savings Plan."
+ },
+ "559": {
+  "answer": [
+   "B",
+   "E"
+  ],
+  "explanation": "Tag do team tự gắn = user-defined tag. Muốn tag hiện trong báo cáo chi phí phải activate cost allocation tag trong Billing console của management (payer) account. A tag AWS generated không phải tag theo product line. C Resource Groups không dùng cho billing. D account thành viên không activate được cost allocation tag."
+ },
+ "569": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "EventBridge publish metric vào namespace AWS/Events: MatchedEvents (rule có khớp điều kiện không), Invocations / FailedInvocations (target có được gọi không). B DLQ chỉ có khi cấu hình và chỉ chứa lần gọi lỗi. C EventBridge không tự ghi log CloudWatch Logs. D CloudTrail ghi API call quản lý, không ghi việc rule khớp."
+ },
+ "581": {
+  "answer": [
+   "B"
+  ],
+  "explanation": "Cần luôn tối thiểu 2 instance kể cả khi mất 1 AZ → min = 4, chia 2+2 ở 2 AZ. App stateful production → On-Demand (Spot có thể bị thu hồi). A mất 1 AZ chỉ còn 1 instance. C/D dùng Spot."
+ },
+ "599": {
+  "answer": [
+   "A",
+   "C",
+   "F"
+  ],
+  "explanation": "Mô hình trách nhiệm chung với Outposts: khách hàng lo điện + mạng ổn định tới rack (A), an ninh vật lý data center (C), và dự phòng capacity cho ECS khi server lỗi/bảo trì (F). AWS lo hypervisor, storage, dịch vụ trên Outposts (B), hạ tầng bên trong rack (D) và bảo trì vật lý linh kiện Outposts (E)."
+ },
+ "608": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "WAF web ACL gắn vào ALB với IP set rule → chỉ cho IP đã đăng ký, dễ cập nhật, chứa hàng chục nghìn IP. D network ACL tối đa ~20-40 rule → không đủ cho 20.000 địa điểm. B Firewall Manager dùng để quản lý đa account. C ALB không có Lambda authorizer."
+ },
+ "638": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "Presigned URL do Lambda tạo cho phép nhân viên upload/download object trong thời gian giới hạn mà không cần tài khoản AWS → bảo mật, gần như không vận hành. B IAM user cho từng người → overhead lớn. C File Gateway là thiết bị on-prem, không hợp nhân viên khắp thế giới. D Transfer Family + identity provider tùy chỉnh → phức tạp hơn."
+ },
+ "20": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Fast Snapshot Restore (FSR) tạo volume từ snapshot đã khởi tạo sẵn → đạt ngay hiệu năng I/O tối đa, clone nhanh, tách biệt production. A instance store mất dữ liệu khi stop và không restore snapshot trực tiếp được. B Multi-Attach dùng chung volume production → thay đổi ảnh hưởng production. C khởi tạo volume thủ công rất chậm."
+ },
+ "151": {
+  "answer": [
+   "A",
+   "C"
+  ],
+  "explanation": "A: Control Tower guardrails (data residency) chặn Region khác + chặn internet. C: SCP trong Organizations áp ở mức account, chặn tạo IGW/internet và các Region khác ngoài ap-northeast-3 — kể cả admin cũng không vượt được. B WAF không chặn kết nối internet của VPC, account settings không có chức năng deny Region. D NACL + IAM từng user → admin vẫn sửa được, khó quản. E Config chỉ phát hiện/cảnh báo, không ngăn chặn."
+ },
+ "157": {
+  "answer": [
+   "D",
+   "E"
+  ],
+  "explanation": "E: AWS Backup giữ backup đúng 5 năm rồi tự xóa (automated backup Aurora tối đa 35 ngày → C sai). D: export audit log (pgaudit) sang CloudWatch Logs, đặt retention Never expire → giữ vô thời hạn. A snapshot thủ công không tự xóa sau 5 năm. B automated backups không có lifecycle policy."
+ },
+ "158": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "CloudFront phân phối cả live streaming và video on-demand qua edge location toàn cầu, có cache. Global Accelerator tối ưu đường mạng TCP/UDP nhưng không cache nội dung. Route 53 chỉ là DNS. S3 Transfer Acceleration tăng tốc upload vào S3, không phải phát video."
+ },
+ "159": {
+  "answer": [
+   "A",
+   "C"
+  ],
+  "explanation": "A: usage plan + API key chỉ phát cho user thật → request không có key bị từ chối. C: WAF trên API Gateway chặn botnet (rate-based rule, IP reputation, managed rules). B xử lý trong Lambda vẫn tốn tiền invocation và khó duy trì danh sách IP. D private API không truy cập được từ internet → hỏng app public. E IAM role cho từng user không khả thi với người dùng public."
+ },
+ "160": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "300 MB/tháng, giữ 30 ngày, cần truy cập trong mili giây → S3 Standard rẻ và lấy ngay. Glacier lấy chậm (phút-giờ, trừ Instant Retrieval) và có phí lưu tối thiểu 90 ngày. OpenSearch và RDS chạy instance liên tục → đắt hơn nhiều cho việc chỉ lưu backup."
+ },
+ "178": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "AWS Backup quản lý tập trung backup EC2 + RDS và có cross-Region copy tự động trong backup plan → ít vận hành nhất. B DLM chỉ quản lý EBS snapshot/AMI, không hỗ trợ RDS. C/D nhiều bước thủ công; read replica (C) là replication, không phải backup."
+ },
+ "179": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "EC2 nhận quyền qua IAM role (gắn bằng instance profile), không gắn trực tiếp policy vào EC2 (B sai ở điểm này). Role cần quyền đọc parameter (ssm:GetParameter) và kms:Decrypt cho key mã hóa SecureString. C/D trust relationship giữa parameter/DB và EC2 không tồn tại."
+ },
+ "184": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "Lambda mặc định chạy trong VPC của dịch vụ Lambda, không thấy mạng nội bộ. Cấu hình Lambda chạy trong VPC của account (subnet private + security group) → traffic theo route table sẵn có tới virtual private gateway → Direct Connect → DB on-prem. B VPN không cần vì đã có Direct Connect. C route table đã route non-VPC traffic tới VGW rồi, vấn đề là Lambda chưa nằm trong VPC. D không hợp lệ."
+ },
+ "232": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "VPC Flow Logs ghi kết nối tới port 22 (SSH)/3389 (RDP) → đẩy vào CloudWatch Logs, tạo metric filter đếm các kết nối ACCEPT trên các port đó, alarm gửi thông báo (SNS). A Application Insights giám sát sức khỏe ứng dụng, không phát hiện phiên RDP/SSH. B chỉ cho phép quản lý bằng Systems Manager, không thông báo gì. D state-change là start/stop instance, không phải đăng nhập."
+ },
+ "423": {
+  "answer": [
+   "A",
+   "B"
+  ],
+  "explanation": "Identity-based policy gắn được vào IAM user, group, role. Organization không phải IAM principal (dùng SCP). Tài nguyên ECS/EC2 không gắn trực tiếp policy — chúng nhận quyền qua role (task role / instance profile). (Đề gốc có ảnh JSON policy bị mất khi trích PDF; đáp án không phụ thuộc nội dung JSON.)"
+ },
+ "429": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Đề gốc có ảnh JSON policy (bị mất khi trích PDF). Theo đáp án phổ biến: Statement 1 Allow ec2:* với điều kiện Region us-east-1; Statement 2 Deny ec2:StopInstances và ec2:TerminateInstances khi không có MFA (BoolIfExists aws:MultiFactorAuthPresent=false). Kết quả: mọi action EC2 ở us-east-1, riêng Stop/Terminate cần đăng nhập MFA. Nhớ: mọi statement đều được đánh giá (A sai), explicit Deny thắng Allow."
+ },
+ "654": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Tách từng thành phần sang dịch vụ managed, HA: static content → S3 + CloudFront; PHP app → ECS Fargate sau ALB (nhiều AZ, không quản lý server); session Redis → ElastiCache Redis Multi-AZ. A 1 instance public → không HA. B Lambda không chạy app PHP/Apache có sẵn mà không viết lại. C backend vẫn 1 EC2 → single point of failure."
+ },
+ "655": {
+  "answer": [
+   "C",
+   "E"
+  ],
+  "explanation": "ALB hỗ trợ sticky session (cookie) và tích hợp AWS WAF. Tạo web ACL rồi gắn vào ALB. NLB không gắn được WAF; Gateway LB dùng cho appliance mạng, không phải public endpoint cho web. D Elastic IP + target group thứ hai không giải quyết WAF hay sticky session."
+ },
+ "658": {
+  "answer": [
+   "A",
+   "E"
+  ],
+  "explanation": "Latency thấp nhất cho HPC → cluster placement group (instance gần nhau trong 1 AZ, mạng băng thông cao). Cần cả NFS và SMB → FSx for NetApp ONTAP (multi-protocol). Partition placement group dùng để cô lập lỗi (Hadoop/Kafka), không tối ưu latency. Lustre chỉ có client Lustre (Linux), OpenZFS chỉ NFS → không có SMB."
+ },
+ "663": {
+  "answer": [
+   "D"
+  ],
+  "explanation": "Giới hạn truy cập theo đường mạng: S3 bucket policy chỉ cho phép request đi qua S3 VPC endpoint (aws:SourceVpce) → chỉ tài nguyên trong VPC (ECS) truy cập được; RDS security group chỉ mở cho subnet của ECS task. A/B mã hóa KMS không giới hạn ai kết nối tới DB. C dùng task execution role (role để kéo image/ghi log, không phải task role của app) → sai chỗ, và thiếu S3 endpoint. (File nguồn ghi C, đã sửa theo đáp án phổ biến.)"
+ },
+ "666": {
+  "answer": [
+   "B",
+   "E"
+  ],
+  "explanation": "Không đổi code: RDS for MySQL Multi-AZ (cùng engine, failover tự động) + ALB phân phối tới Auto Scaling group EC2 trải qua 2 AZ (app stateless nên chạy nhiều instance được). A internet gateway vốn đã HA ở cấp VPC, không tạo theo AZ. C DynamoDB phải đổi code. D DataSync dùng để đồng bộ file, không đồng bộ database."
+ },
+ "674": {
+  "answer": [
+   "B",
+   "D"
+  ],
+  "explanation": "Tải đọc nặng → read replica nhận traffic đọc (B) và ElastiCache cache kết quả query (D) để giảm số lượt đọc DB. A RDS không có auto scaling compute (chỉ storage auto scaling). C standby Multi-AZ (instance) không nhận traffic đọc. E dồn EC2 vào 1 AZ làm giảm HA, không giải quyết tải đọc."
+ },
+ "678": {
+  "answer": [
+   "B"
+  ],
+  "explanation": "Customer managed key (KMS) → công ty toàn quyền tạo, bật/tắt rotation, disable, sửa key policy, dùng SSE-KMS gần như không tốn công. A SSE-S3 do AWS quản lý key hoàn toàn. C AWS managed key không thể tự tạo/disable hay sửa policy. D mã hóa thủ công qua EC2 → tốn công nhất."
+ },
+ "679": {
+  "answer": [
+   "A",
+   "C",
+   "E"
+  ],
+  "explanation": "Phải giữ 30 ngày (không ai xóa được) rồi tự xóa: bật S3 Object Lock khi tạo bucket (A, versioning tự bật theo) + default retention 30 ngày (C) chống xóa/ghi đè + Lifecycle expire sau 30 ngày (E) để tự xóa. B versioning một mình không chống xóa. D Lifecycle không có chức năng bảo vệ. F tag không tự áp dụng retention. (File nguồn ghi BCE, đã sửa theo đáp án phổ biến.)"
+ },
+ "680": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "DataSync có location S3 và EFS sẵn, chạy task theo lịch, chế độ transfer only data that has changed → chỉ ghi đè khi file nguồn thay đổi, không cần code. B Lambda phải tự viết logic copy/so sánh. C transfer all data copy lại toàn bộ mỗi lần. D EC2 + script → overhead cao nhất."
+ },
+ "682": {
+  "answer": [
+   "A"
+  ],
+  "explanation": "IAM policy chỉ cho tạo EBS volume mã hóa (ngăn vi phạm mới) + AWS Config rule (encrypted-volumes) tự phát hiện volume không mã hóa + remediation qua Systems Manager Automation → tự động, ít quản trị nhất. B KMS chỉ quản lý key, Lambda/EventBridge phải tự viết. C Macie dành cho dữ liệu nhạy cảm trong S3. D Inspector quét lỗ hổng, không kiểm tra mã hóa EBS."
+ },
+ "683": {
+  "answer": [
+   "A",
+   "C"
+  ],
+  "explanation": "Ít thay đổi app + tăng resiliency: web tier lên EC2 Auto Scaling sau ALB (nhiều AZ), DB MySQL lên RDS Multi-AZ (cùng engine, failover tự động). B DB trên ASG sau NLB không đồng bộ dữ liệu giữa các node. D Lambda và E DynamoDB đều phải viết lại code."
+ }
+}
