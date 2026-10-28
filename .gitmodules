@@ -1,0 +1,3 @@
+[submodule "resources/aws-saa-c03-practice-questions"]
+	path = resources/aws-saa-c03-practice-questions
+	url = https://github.com/Iamrushabhshahh/aws-saa-c03-practice-questions.git
