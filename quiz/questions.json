@@ -157,7 +157,8 @@
    "B"
   ],
   "explanation": "B. Use an API Gateway integration to send a message to an Amazon Simple Queue Service (Amazon SQS) FIFO queue when the application receives an order. Configure the SQS FIFO queue to invoke an AWS Lambda function for processing\nUse an API Gateway integration to send a message to an Amazon Simple Queue Service (Amazon SQS) FIFO queue when the application receives an order. Configure the SQS FIFO queue to invoke an AWS Lambda function for processing.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Yêu cầu: xử lý đơn đúng thứ tự nhận → SQS FIFO (giữ thứ tự + không trùng). A: SNS không đảm bảo thứ tự. C: chặn request là sai cách, mất đơn. D: SQS standard chỉ \"best-effort ordering\", có thể đảo thứ tự."
  },
  {
   "id": 11,
@@ -384,7 +385,8 @@
    "B"
   ],
   "explanation": "B. Use Cost Explorer's granular filtering feature to perform an in-depth analysis of EC2 costs based on instance types.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Cần biểu đồ so sánh chi phí 2 tháng + lọc chi tiết theo instance type, ít công sức → Cost Explorer có sẵn filter/group by. A: Budgets để đặt ngưỡng cảnh báo, không phân tích sâu. C: dashboard Billing chỉ tổng quan, không lọc chi tiết. D: CUR + QuickSight làm được nhưng phải dựng thêm → nhiều overhead."
  },
  {
   "id": 25,
@@ -772,7 +774,8 @@
    "D"
   ],
   "explanation": "D. Move the catalog to an Amazon Elastic File System (Amazon EFS) file system.\nEFS is fully managed, durable, highly available, and shared file system.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Instance store mất dữ liệu khi stop/terminate → cần chỗ lưu bền + HA. EFS lưu dữ liệu nhiều AZ, mount như file system nên app ít phải sửa. A: ElastiCache là cache in-memory, không phải nơi lưu bền. B: instance store to hơn vẫn tạm thời. C: Deep Archive lấy lại mất hàng giờ, không dùng cho website."
  },
  {
   "id": 49,
@@ -822,7 +825,8 @@
    "D"
   ],
   "explanation": "D. Create an Amazon EventBridge (Amazon CloudWatch Events) scheduled event that invokes an AWS Lambda function to query the application's API for the data.\nB. Use Amazon Simple Email Service (Amazon SES) to format the data and to send the report by email.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "D: EventBridge lịch hằng sáng gọi Lambda lấy dữ liệu qua API (nhẹ, serverless). B: SES gửi email định dạng HTML tới nhiều người. A: Firehose để streaming, không liên quan. C: Glue là ETL, nặng so với việc gọi 1 API. E: SNS email chỉ gửi text thô, không định dạng HTML."
  },
  {
   "id": 52,
@@ -838,7 +842,8 @@
    "C"
   ],
   "explanation": "C. Migrate the application to Amazon EC2 instances in a Multi-AZ Auto Scaling group. Use Amazon Elastic File System (Amazon EFS) for storage.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Cần file system chuẩn, dung lượng tới hàng trăm TB, tự scale, HA → EFS (tự giãn dung lượng, nhiều AZ) + EC2 Auto Scaling Multi-AZ. A: S3 là object storage, không phải file system. B/D: EBS gắn 1 AZ, phải tự quản dung lượng, không share giữa nhiều instance."
  },
  {
   "id": 53,
@@ -854,7 +859,8 @@
    "C"
   ],
   "explanation": "C. Use an S3 Lifecycle policy to transition the records from S3 Standard to S3 Glacier Deep Archive after 1 year. Use S3 Object Lock in compliance mode for a period of 10 years.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Năm đầu truy cập ngay (S3 Standard), sau đó lưu trữ → Lifecycle sang Glacier Deep Archive (rẻ nhất). Không ai kể cả root được xóa → Object Lock compliance mode. A/B: policy có thể bị admin/root sửa. D: governance mode cho phép người có quyền đặc biệt bỏ khóa; One Zone-IA chỉ 1 AZ → không \"maximum resiliency\"."
  },
  {
   "id": 54,
@@ -870,7 +876,8 @@
    "C"
   ],
   "explanation": "C. Extend the file share environment to Amazon FSx for Windows File Server with a Multi-AZ configuration. Migrate all the data to FSx for Windows File Server.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Người dùng đang dùng Windows file share (SMB) → FSx for Windows File Server Multi-AZ: giữ nguyên cách truy cập, HA + bền. A: S3 không phải SMB share. B: File Gateway mount lên EC2 cũ vẫn phụ thuộc 2 EC2 đó. D: EFS là NFS cho Linux, Windows không dùng được."
  },
  {
   "id": 55,
@@ -886,7 +893,8 @@
    "C"
   ],
   "explanation": "C. Create a security group that allows inbound traffic from the security group that is assigned to instances in the private subnets. Attach the security group to the DB instances.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Security group cho phép (allow) inbound từ security group của EC2 ở private subnet → chỉ đúng nhóm đó vào được DB. A: route table trong VPC luôn có route local, không chặn được. B: security group không có rule deny. D: peering là giữa VPC, không phải giữa subnet."
  },
  {
   "id": 56,
@@ -902,7 +910,8 @@
    "C"
   ],
   "explanation": "C. Create a Regional API Gateway endpoint. Associate the API Gateway endpoint with the company's domain name. Import the public\ncertificate associated with the company's domain name into AWS Certificate Manager (ACM) in the same Region. Attach the certificate to the\nAPI Gateway endpoint. Configure Route 53 to route traffic to the API Gateway endpoint.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "API Gateway Regional dùng custom domain → chứng chỉ ACM phải ở cùng Region (ca-central-1), gắn vào endpoint, Route 53 trỏ tới. B/D: us-east-1 chỉ cần cho endpoint edge-optimized (CloudFront). A: stage variable không đổi được URL."
  },
  {
   "id": 57,
@@ -918,7 +927,8 @@
    "B"
   ],
   "explanation": "B. Use Amazon Rekognition to detect inappropriate content. Use human review for low-confidence predictions.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Ảnh có nội dung không phù hợp, ít phát triển → Rekognition có sẵn content moderation, kèm human review (A2I) cho dự đoán độ tin cậy thấp. A: Comprehend phân tích văn bản, không phải ảnh. C/D: tự train model → nhiều công sức."
  },
  {
   "id": 58,
@@ -934,7 +944,8 @@
    "C"
   ],
   "explanation": "C. Use Amazon Elastic Container Service (Amazon ECS) on AWS Fargate.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không muốn quản lý hạ tầng chạy container → ECS trên Fargate (serverless). A/B/D đều phải tự quản EC2 (patch, scale)."
  },
  {
   "id": 59,
@@ -950,7 +961,8 @@
    "D"
   ],
   "explanation": "D. Collect the data from Amazon Kinesis Data Streams. Use Amazon Kinesis Data Firehose to transmit the data to an Amazon S3 data lake. Load the data in Amazon Redshift for analysis.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Clickstream 30 TB/ngày → Kinesis Data Streams thu thập, Firehose đẩy vào S3 data lake, Redshift phân tích. A: Data Pipeline + EMR là xử lý batch, không thu nhận stream. B: tự dựng EC2 → nhiều vận hành. C: CloudFront là CDN, không dùng để thu dữ liệu."
  },
  {
   "id": 60,
@@ -966,7 +978,8 @@
    "C"
   ],
   "explanation": "C. Create a listener rule on the ALB to redirect HTTP traffic to HTTPS.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "ALB có listener rule redirect HTTP → HTTPS sẵn. A: NACL không \"chuyển\" được HTTP sang HTTPS, chỉ chặn. B: không có kiểu rule thay URL như vậy. D: NLB là layer 4, không redirect HTTP."
  },
  {
   "id": 61,
@@ -982,7 +995,8 @@
    "C"
   ],
   "explanation": "C. Store the database credentials as a secret in AWS Secrets Manager. Turn on automatic rotation for the secret. Attach the required permission to the EC2 role to grant access to the secret.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không hard-code + tự rotate credential DB → Secrets Manager có rotation tích hợp cho RDS; EC2 lấy secret qua IAM role. D: Parameter Store không có tính năng tự rotate. A/B: tự viết Lambda rotate → nhiều overhead, metadata/S3 không phải chỗ lưu secret."
  },
  {
   "id": 62,
@@ -998,7 +1012,8 @@
    "D"
   ],
   "explanation": "D. Use AWS Certificate Manager (ACM) to import an SSL/TLS certificate. Apply the certificate to the ALB. Use Amazon EventBridge (Amazon CloudWatch Events) to send a notification when the certificate is nearing expiration. Rotate the certificate manually.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chứng chỉ do CA bên ngoài cấp → phải import vào ACM. ACM không tự gia hạn chứng chỉ import → dùng EventBridge cảnh báo sắp hết hạn rồi thay thủ công. A/B/C: chứng chỉ do ACM/ACM Private CA cấp, không phải CA bên ngoài."
  },
  {
   "id": 63,
@@ -1014,7 +1029,8 @@
    "A"
   ],
   "explanation": "A. Save the .pdf files to Amazon S3. Configure an S3 PUT event to invoke an AWS Lambda function to convert the files to .jpg format and store them back in Amazon S3.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Lưu file + chuyển đổi khi có upload, rẻ nhất và scale → S3 + event PUT gọi Lambda. B: DynamoDB giới hạn item 400 KB, không chứa file 5 MB. C/D: EC2 + EBS/EFS chạy suốt → đắt hơn và phải quản lý."
  },
  {
   "id": 64,
@@ -1030,7 +1046,8 @@
    "D"
   ],
   "explanation": "D. Deploy and configure Amazon FSx for Windows File Server on AWS. Deploy and configure an Amazon FSx File Gateway on premises. Move the on-premises file data to the FSx File Gateway. Configure the cloud workloads to use FSx for Windows File Server on AWS. Configure the on-premises workloads to use the FSx File Gateway.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Vừa on-prem vừa AWS, latency thấp, giữ cách truy cập Windows share → FSx for Windows trên AWS + FSx File Gateway on-prem (cache cục bộ). A: user on-prem phải truy cập qua VPN → latency cao. B/C: S3 File Gateway lưu vào S3, không phải Windows file server, thay đổi cách truy cập."
  },
  {
   "id": 65,
@@ -1046,7 +1063,8 @@
    "C"
   ],
   "explanation": "C. Use Amazon Textract to extract the text from the reports. Use Amazon Comprehend Medical to identify the PHI from the extracted text.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Trích chữ từ PDF/JPEG → Textract; nhận diện PHI (thông tin y tế) → Comprehend Medical. Cả hai managed → ít vận hành. A: tự viết thư viện. B: SageMaker phải tự train model. D: Rekognition để phân tích ảnh, không trích văn bản tài liệu."
  },
  {
   "id": 66,
@@ -1062,7 +1080,8 @@
    "C"
   ],
   "explanation": "C. Create an S3 bucket lifecycle policy to move files from S3 Standard to S3 Standard-Infrequent Access (S3 Standard-IA) 30 days from object creation. Delete the files 4 years after object creation.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Sau 30 ngày ít truy cập nhưng vẫn phải lấy ngay, dữ liệu khó tạo lại → Standard-IA (nhiều AZ) rồi xóa sau 4 năm. A: Glacier (Flexible) không lấy ngay. B: One Zone-IA có thể mất dữ liệu khi mất AZ. D: giữ quá 4 năm, tốn thêm tiền không cần."
  },
  {
   "id": 67,
@@ -1078,7 +1097,8 @@
    "D"
   ],
   "explanation": "D. Use the ChangeMessageVisibility API call to increase the visibility timeout.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Bản ghi trùng vì EC2 xử lý chưa xong thì message hết visibility timeout, quay lại queue và EC2 khác nhận lần nữa → tăng visibility timeout (ChangeMessageVisibility). A/B: không liên quan. C: wait time là long polling, không chống xử lý trùng."
  },
  {
   "id": 68,
@@ -1094,7 +1114,8 @@
    "A"
   ],
   "explanation": "A. Provision an AWS Direct Connect connection to a Region. Provision a VPN connection as a backup if the primary Direct Connect connection fails.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Latency ổn định → Direct Connect; tiết kiệm và chấp nhận chậm khi sự cố → VPN làm backup (rẻ). B: chỉ VPN qua internet, latency không ổn định. C: 2 Direct Connect tốn kém. D: không có thuộc tính \"failover\" tự tạo kết nối."
  },
  {
   "id": 69,
@@ -1110,7 +1131,8 @@
    "B"
   ],
   "explanation": "B. Configure the Auto Scaling group to use multiple Availability Zones. Configure the database as Multi-AZ. Configure an Amazon RDS Proxy instance for the database.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "HA, ít mất dữ liệu, ít công sức → ASG trải nhiều AZ + DB Multi-AZ (failover tự động); RDS Proxy giúp failover nhanh hơn. A/D: đa Region phức tạp hơn mức cần. C: snapshot theo giờ → mất tới 1 giờ dữ liệu + downtime."
  },
  {
   "id": 70,
@@ -1126,7 +1148,8 @@
    "C"
   ],
   "explanation": "C. Replace the NLB with an Application Load Balancer. Enable HTTP health checks by supplying the URL of the company's application. Configure an Auto Scaling action to replace unhealthy instances.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Cần phát hiện lỗi HTTP và tự thay instance hỏng, không viết code → ALB với health check HTTP + Auto Scaling thay instance unhealthy. A: NLB thực tế cũng có health check HTTP, nhưng chỉ bật health check thì không có bước tự thay instance; đáp án được đa số tài liệu chọn là C. B: cron job là script tự viết. D: UnhealthyHostCount của NLB vẫn dựa trên health check TCP nên không bắt được lỗi HTTP."
  },
  {
   "id": 71,
@@ -1142,7 +1165,8 @@
    "B"
   ],
   "explanation": "B. Configure DynamoDB point-in-time recovery. For RPO recovery, restore to the desired point in time.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Dữ liệu bị hỏng, RPO 15 phút → DynamoDB point-in-time recovery khôi phục tới từng giây trong 35 ngày. A: global tables sao chép cả dữ liệu hỏng sang Region khác. C: export hằng ngày → RPO 24h. D: DynamoDB không dùng EBS."
  },
  {
   "id": 72,
@@ -1158,7 +1182,8 @@
    "D"
   ],
   "explanation": "D. Deploy an S3 VPC gateway endpoint into the VPC and attach an endpoint policy that allows access to the S3 buckets.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "S3 cùng Region, muốn giảm phí truyền dữ liệu → S3 gateway VPC endpoint (miễn phí, đi mạng private). B: NAT gateway tính phí theo GB xử lý. C: qua internet gateway vẫn đi đường public. A: API Gateway không làm proxy cho S3 theo kiểu này và tốn thêm phí."
  },
  {
   "id": 73,
@@ -1176,7 +1201,8 @@
    "D"
   ],
   "explanation": "C. Replace the current security group of the bastion host with one that only allows inbound access from the external IP range for the company.\nD. Replace the current security group of the application instances with one that allows inbound SSH access from only the private IP address of the bastion host.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Đi từ on-prem qua internet → bastion chỉ nên nhận SSH từ IP public (external) của công ty (C). App server ở private subnet chỉ nhận SSH từ IP private của bastion (D), vì trong VPC traffic đi bằng IP private. A: bastion phải nhận từ công ty, không phải từ app. B: IP nội bộ công ty không đi qua internet tới được. E: traffic trong VPC không dùng IP public của bastion."
  },
  {
   "id": 74,
@@ -1194,7 +1220,8 @@
    "C"
   ],
   "explanation": "A. Configure the security group for the web tier to allow inbound traffic on port 443 from 0.0.0.0/0.\nC. Configure the security group for the database tier to allow inbound traffic on port 1433 from the security group for the web tier.\nIMP",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Web tier public → mở inbound 443 từ 0.0.0.0/0 (A). DB SQL Server chỉ nhận cổng 1433 từ security group của web tier (C). B/D: security group là stateful, không cần mở outbound để trả lời; D còn sai hướng. E: DB không cần mở 443."
  },
  {
   "id": 75,
@@ -1210,7 +1237,8 @@
    "A"
   ],
   "explanation": "A. Use Amazon API Gateway and direct transactions to the AWS Lambda functions as the application layer. Use Amazon Simple Queue Service (Amazon SQS) as the communication layer between application services.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Tier bị quá tải làm rơi giao dịch → tách tầng bằng SQS (giữ message tới khi xử lý), Lambda + API Gateway serverless tự scale → hiện đại hóa, ít vận hành nhất. B: tăng size EC2 không giải quyết gốc rễ. C: SNS không có \"queue length\", không giữ message. D: vẫn tự quản EC2, chỉ scale khi đã lỗi."
  },
  {
   "id": 76,
@@ -1226,7 +1254,8 @@
    "B"
   ],
   "explanation": "B. AWS DataSync over AWS Direct Connect",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "10 TB/ngày, nhạy cảm, cần tin cậy → DataSync (chuyển file, mã hóa, kiểm tra toàn vẹn) qua Direct Connect (đường riêng, ổn định). A: internet công cộng kém ổn định. C/D: DMS dùng cho database, không phải file JSON trên SAN."
  },
  {
   "id": 77,
@@ -1242,7 +1271,8 @@
    "C"
   ],
   "explanation": "C. Configure an Amazon API Gateway API to send data to an Amazon Kinesis data stream. Create an Amazon Kinesis Data Firehose delivery stream that uses the Kinesis data stream as a data source. Use AWS Lambda functions to transform the data. Use the Kinesis Data Firehose delivery stream to send the data to Amazon S3.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Ít vận hành → API Gateway (managed) thay EC2; Kinesis Data Streams nhận dữ liệu, Firehose + Lambda biến đổi rồi ghi S3. A: tự dựng EC2 cho API. B/D: Glue là ETL batch, không nhận dữ liệu streaming từ API trực tiếp; B còn chỉnh source/dest check vô nghĩa."
  },
  {
   "id": 78,
@@ -1258,7 +1288,8 @@
    "B"
   ],
   "explanation": "B. Use AWS Backup to create backup schedules and retention policies for the table.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giữ backup 7 năm, ít công sức → AWS Backup: lịch + retention policy tự động. A: PITR chỉ giữ tối đa 35 ngày. C: backup thủ công qua console. D: tự viết Lambda → overhead."
  },
  {
   "id": 79,
@@ -1274,7 +1305,8 @@
    "A"
   ],
   "explanation": "A. Create a DynamoDB table in on-demand capacity mode.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Sáng không dùng, tối tải khó đoán và tăng vọt nhanh → on-demand capacity: trả theo request, tự đáp ứng ngay. C: auto scaling của provisioned phản ứng chậm với spike đột ngột và vẫn trả tiền lúc rảnh. B: GSI không liên quan chi phí/tải. D: global table là đa Region, không cần."
  },
  {
   "id": 80,
@@ -1290,7 +1322,8 @@
    "B"
   ],
   "explanation": "B. Modify the launchPermission property of the AMI. Share the AMI with the MSP Partner's AWS account only. Modify the key policy to allow the MSP Partner's AWS account to use the key.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chia sẻ AMI an toàn → sửa launchPermission chỉ cho account của MSP, và key policy cho phép account đó dùng KMS key (để giải mã snapshot). A: public AMI là không an toàn. C: không thể \"trust\" key của account khác để giải mã snapshot đã mã hóa bằng key của mình. D: phức tạp, không cần."
  },
  {
   "id": 81,
@@ -1306,7 +1339,8 @@
    "C"
   ],
   "explanation": "C. Create an Amazon SQS queue to hold the jobs that need to be processed. Create an Amazon Machine Image (AMI) that consists of the processor application. Create a launch template that uses the AMI. Create an Auto Scaling group using the launch template. Set the scaling policy for the Auto Scaling group to add and remove nodes based on the number of items in the SQS queue.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Job lưu bền + loose coupling → SQS; scale theo số message trong queue (đúng thước đo khối lượng việc). Launch template là cách hiện tại (launch configuration đã cũ). A/D: SNS không lưu job, không có hàng đợi. B: scale theo network usage không phản ánh số job."
  },
  {
   "id": 82,
@@ -1338,7 +1372,8 @@
    "C"
   ],
   "explanation": "C. Use Amazon CloudFront with a custom origin pointing to the on-premises servers.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Backend phải ở Mỹ, cần nhanh cho user châu Âu trong vài ngày → CloudFront với custom origin là server on-prem: cache tại edge gần user. A/B: phải migrate site, không kịp; B: site động không chạy được trên S3. D: geoproximity vẫn trỏ về cùng server ở Mỹ, không giảm latency."
  },
  {
   "id": 84,
@@ -1354,7 +1389,8 @@
    "B"
   ],
   "explanation": "B. Use Reserved Instances for the production EC2 instances. Use On-Demand Instances for the development and test EC2 instances.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Production chạy 24/7 ổn định → Reserved Instances (giảm giá nhiều). Dev/test chạy ~8h/ngày và sẽ tắt khi rảnh → On-Demand (trả theo giờ dùng). A/C: production dùng Spot có thể bị thu hồi. D: Spot blocks đã ngừng; production On-Demand đắt hơn RI."
  },
  {
   "id": 85,
@@ -1370,7 +1406,8 @@
    "A"
   ],
   "explanation": "A. Store the uploaded documents in an Amazon S3 bucket with S3 Versioning and S3 Object Lock enabled.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không được sửa/xóa sau khi lưu → S3 Object Lock (WORM), yêu cầu bật Versioning. B: Lifecycle chỉ chuyển tier. C: ACL có thể bị thay đổi, không phải WORM. D: mount read-only chỉ là phía client, không chặn được người khác."
  },
  {
   "id": 86,
@@ -1386,7 +1423,8 @@
    "A"
   ],
   "explanation": "A. Store the database user credentials in AWS Secrets Manager. Grant the necessary IAM permissions to allow the web servers to access AWS Secrets Manager.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Rotate credential thường xuyên → Secrets Manager (tự rotate cho RDS), web server lấy secret qua IAM. B: OpsCenter dùng xử lý sự cố, không lưu credential. C/D: S3/file mã hóa không tự rotate."
  },
  {
   "id": 87,
@@ -1402,7 +1440,8 @@
    "D"
   ],
   "explanation": "D. Store the customer data in an Amazon Simple Queue Service (Amazon SQS) FIFO queue. Create a new Lambda function that polls the queue and stores the customer data in the database.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Trong lúc nâng cấp DB không ghi được → cần nơi giữ dữ liệu tạm: đưa vào SQS FIFO, Lambda khác đọc và ghi vào DB khi DB sẵn sàng. A: RDS Proxy giảm lỗi kết nối nhưng không giữ dữ liệu khi DB ngừng hẳn. B: Lambda tối đa 15 phút, upgrade có thể lâu hơn. C: /tmp của Lambda là tạm thời, mất khi môi trường bị thu hồi."
  },
  {
   "id": 88,
@@ -1418,7 +1457,8 @@
    "A"
   ],
   "explanation": "A. Configure the Requester Pays feature on the company's S3 bucket.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Requester Pays: bên tải dữ liệu (công ty marketing) trả phí truyền dữ liệu → chi phí công ty thấp nhất. B/D: replication/sync khiến công ty trả phí truyền xuyên Region. C: chỉ cho quyền truy cập, công ty vẫn trả phí data transfer."
  },
  {
   "id": 89,
@@ -1434,7 +1474,8 @@
    "A"
   ],
   "explanation": "A. Enable the versioning and MFA Delete features on the S3 bucket.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chống xóa nhầm → bật Versioning (xóa vẫn còn bản cũ) + MFA Delete (xóa vĩnh viễn phải có MFA). B: MFA đăng nhập không ngăn user đã đăng nhập xóa nhầm. C: Lifecycle policy không gắn vào IAM user. D: mã hóa không chống xóa."
  },
  {
   "id": 90,
@@ -1450,7 +1491,8 @@
    "B"
   ],
   "explanation": "B. Create a read replica of the database. Configure the script to query only the read replica.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Script đọc làm chậm DB → tạo read replica cho script query riêng. A: Multi-AZ standby không phục vụ đọc. C: thủ công. D: script đếm phim mới, cache không phản ánh dữ liệu mới và cần sửa code."
  },
  {
   "id": 91,
@@ -1466,7 +1508,8 @@
    "A"
   ],
   "explanation": "A. Configure an S3 gateway endpoint.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Gọi S3 không đi qua internet → S3 gateway endpoint (route qua mạng AWS). B: bucket S3 không nằm trong subnet. C: cùng Region vẫn đi endpoint public. D: NAT gateway đi ra internet."
  },
  {
   "id": 92,
@@ -1484,7 +1527,8 @@
    "C"
   ],
   "explanation": "A. Configure a VPC gateway endpoint for Amazon S3 within the VPC.\nC. Create a bucket policy that limits access to only the application tier running in the VPC.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "A: gateway endpoint cho S3 → traffic private trong VPC. C: bucket policy chỉ cho phép truy cập từ VPC/endpoint đó (aws:sourceVpce). B: public là ngược yêu cầu bảo mật. D: copy credential IAM user vào EC2 là anti-pattern (dùng IAM role). E: NAT đi qua internet."
  },
  {
   "id": 93,
@@ -1500,7 +1544,8 @@
    "B"
   ],
   "explanation": "B. Use Amazon Aurora MySQL with Multi-AZ Aurora Replicas for production. Use database cloning to create the staging database on-demand.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Aurora Replicas gánh tải đọc → giảm latency. Database cloning (copy-on-write) tạo staging gần như tức thì, không làm nặng production. A/D: mysqldump nặng, lâu → vẫn gây latency và dev phải chờ. C: standby của Multi-AZ RDS không truy cập được."
  },
  {
   "id": 94,
@@ -1516,7 +1561,8 @@
    "C"
   ],
   "explanation": "C. Configure Amazon S3 to send an event notification to an Amazon Simple Queue Service (Amazon SQS) queue. Use an AWS Lambda function to read from the queue and process the data. Store the resulting JSON file in Amazon DynamoDB.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Xử lý file ngay khi upload, tải lúc nhiều lúc không → S3 event → SQS → Lambda (serverless, scale về 0), lưu JSON vào DynamoDB. A: EMR quá nặng. B: tự quản EC2. D: Kinesis + Aurora phức tạp và đắt hơn cần."
  },
  {
   "id": 95,
@@ -1532,7 +1578,8 @@
    "D"
   ],
   "explanation": "D. Create read replicas for the database. Configure the read replicas with the same compute and storage resources as the source database.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Tách đọc/ghi → read replica. Replica nên cùng cấu hình với DB gốc để theo kịp tải và replication. A/B: Multi-AZ standby không phục vụ đọc. C: replica yếu hơn có thể bị lag/quá tải."
  },
  {
   "id": 96,
@@ -1548,7 +1595,9 @@
    "C"
   ],
   "explanation": "C. Users can terminate an EC2 instance in the us-east-1 Region when the user's source IP is 10.100.100.254.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Policy chỉ cho terminate khi IP nguồn của user thuộc 10.100.100.0/24, và Deny mọi action EC2 ngoài us-east-1. Vì vậy chỉ terminate được ở us-east-1 VÀ khi IP của user nằm trong dải đó (ví dụ 10.100.100.254) → C. A: các Region khác bị deny. B: điều kiện là IP nguồn của user, không phải IP của instance. D: ngược lại.",
+  "note": "Hình policy bị mất khi trích PDF. Nội dung policy: Statement 1 Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = 10.100.100.0/24. Statement 2 Deny ec2:*, Resource *, Condition StringNotEquals aws:RequestedRegion = us-east-1."
  },
  {
   "id": 97,
@@ -1564,7 +1613,8 @@
    "D"
   ],
   "explanation": "D. Create an Amazon FSx for Windows File Server file system on AWS and set the Active Directory domain for authentication.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "SharePoint cần Windows file share (SMB), HA, tích hợp Active Directory → FSx for Windows File Server. A: EFS là NFS cho Linux. B: Storage Gateway không phải lựa chọn HA cho workload chạy trên AWS. C: S3 không mount làm volume Windows."
  },
  {
   "id": 98,
@@ -1580,7 +1630,8 @@
    "C"
   ],
   "explanation": "C. Increase the visibility timeout in the SQS queue to a value that is greater than the total of the function timeout and the batch window\ntimeout.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Lambda xử lý chưa xong thì message hết visibility timeout và hiện lại → bị xử lý lần nữa. Tăng visibility timeout lớn hơn timeout của Lambda + batch window. A: long polling không liên quan. B: FIFO chỉ chống message trùng khi gửi, không chống xử lý lại; thêm overhead migrate. D: xóa trước khi xử lý → lỗi là mất message."
  },
  {
   "id": 99,
@@ -1596,7 +1647,8 @@
    "D"
   ],
   "explanation": "D. Create an Amazon FSx for Lustre file system. Attach the file system to the origin server. Connect the application server to the file system.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Cần client Lustre + fully managed → FSx for Lustre. A/B: không hỗ trợ Lustre; B còn tự quản. C: EFS không hỗ trợ Lustre."
  },
  {
   "id": 100,
@@ -1612,7 +1664,8 @@
    "C"
   ],
   "explanation": "C. Create an AWS Key Management Service (AWS KMS) customer managed key. Allow the EC2 role to use the KMS key for encryption\noperations. Store the encrypted data on Amazon S3.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Mã hóa/giải mã gần real-time an toàn → KMS customer managed key, EC2 role được dùng key. Lưu sau mã hóa ở nơi HA → S3 (nhiều AZ). A: cập nhật thủ công. B: tự viết code mã hóa. D: EBS chỉ ở 1 AZ."
  },
  {
   "id": 101,
@@ -1628,7 +1681,8 @@
    "A"
   ],
   "explanation": "A. Create three NAT gateways, one for each public subnet in each AZ. Create a private route table for each AZ that forwards non-VPC traffic to the NAT gateway in its AZ.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Private subnet ra internet (IPv4) → NAT gateway đặt ở public subnet, mỗi AZ một cái để HA; route table private mỗi AZ trỏ về NAT cùng AZ. B: NAT instance tự quản, và phải đặt ở public subnet. C: VPC chỉ có 1 internet gateway. D: egress-only IGW chỉ cho IPv6."
  },
  {
   "id": 102,
@@ -1646,7 +1700,8 @@
    "E"
   ],
   "explanation": "B. Install an AWS DataSync agent in the on-premises data center.\nE. Use AWS DataSync to create a suitable location configuration for the on-premises SFTP server.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Tự động chuyển dữ liệu NFS on-prem lên EFS → DataSync: cài agent on-prem (B) và tạo location cho nguồn on-prem (E, file system NFS của server SFTP), đích là EFS. A: EFS dùng được từ mọi AZ trong Region. C: không cần EBS. D: copy thủ công, không tự động."
  },
  {
   "id": 103,
@@ -1662,7 +1717,8 @@
    "A"
   ],
   "explanation": "A. Edit the job to use job bookmarks.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Glue job bookmarks ghi nhớ dữ liệu đã xử lý → lần chạy sau chỉ xử lý dữ liệu mới. B: xóa dữ liệu nguồn là mất dữ liệu. C: số worker không liên quan. D: FindMatches dùng để khử trùng bản ghi, không phải theo dõi dữ liệu mới."
  },
  {
   "id": 104,
@@ -1680,7 +1736,8 @@
    "C"
   ],
   "explanation": "A. Use AWS Shield Advanced to stop the DDoS attack.\nC. Configure the website to use Amazon CloudFront for both static and dynamic content.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "DDoS lớn từ hàng nghìn IP, không chấp nhận downtime → Shield Advanced (chống DDoS L3/L4/L7, có đội hỗ trợ) + CloudFront (hấp thụ traffic tại edge, kể cả nội dung động). B: GuardDuty chỉ phát hiện, không tự chặn. D: NACL giới hạn số rule, không theo kịp hàng nghìn IP. E: Spot có thể bị thu hồi → downtime."
  },
  {
   "id": 105,
@@ -1696,7 +1753,8 @@
    "D"
   ],
   "explanation": "D. Add a resource-based policy to the function with lambda:InvokeFunction as the action and Service: events.amazonaws.com as the principal.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "EventBridge gọi Lambda → cần resource-based policy trên function cho principal events.amazonaws.com, chỉ action lambda:InvokeFunction (least privilege). A/B: execution role là quyền Lambda dùng để gọi dịch vụ khác, không phải quyền để bị gọi; A còn cho mọi principal. C: lambda:* quá rộng."
  },
  {
   "id": 106,
@@ -1712,7 +1770,8 @@
    "D"
   ],
   "explanation": "D. Server-side encryption with AWS KMS keys (SSE-KMS) with automatic rotation",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Mã hóa at rest + log việc dùng key (CloudTrail) + rotate hằng năm, ít công sức → SSE-KMS với automatic rotation (KMS tự rotate mỗi năm). A: SSE-C phải tự quản key. B: SSE-S3 không có log dùng key trong CloudTrail và không kiểm soát rotate. C: rotate thủ công tốn công."
  },
  {
   "id": 107,
@@ -1728,7 +1787,8 @@
    "D"
   ],
   "explanation": "D. Use Amazon API Gateway with Amazon Kinesis Data Analytics.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Vị trí xe gửi liên tục (streaming) và phải truy cập qua REST API → API Gateway nhận dữ liệu + Kinesis Data Analytics xử lý stream đưa vào nền tảng phân tích. A: Athena query S3, không có REST API. B: Lambda không lưu trữ/phân tích stream. C: QuickSight là BI dashboard."
  },
  {
   "id": 108,
@@ -1744,7 +1804,8 @@
    "D"
   ],
   "explanation": "D. Subscribe to an RDS event notification and send an Amazon Simple Notification Service (Amazon SNS) topic fanned out to multiple Amazon\nSimple Queue Service (Amazon SQS) queues. Use AWS Lambda functions to update the targets.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Một sự kiện gửi tới nhiều hệ thống đích → SNS fan-out ra nhiều SQS queue (mỗi đích một queue), Lambda cập nhật đích. A/B: một queue thì mỗi message chỉ một consumer nhận. C: ngược thứ tự — SQS không fan-out sang SNS."
  },
  {
   "id": 109,
@@ -1760,7 +1821,8 @@
    "D"
   ],
   "explanation": "D. Create an S3 bucket with S3 Object Lock enabled. Enable versioning. Add a legal hold to the objects. Add the s3:PutObjectLegalHold permission to the IAM policies of users who need to delete the objects.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không cho sửa trong thời gian không xác định trước, chỉ vài user được gỡ → Object Lock + legal hold (không có ngày hết hạn), cấp quyền s3:PutObjectLegalHold cho người được phép gỡ. A: Glacier vault lock không dùng cho object S3 thường. B: retention 100 năm là thời hạn cố định. C: chỉ phát hiện sau khi đã bị sửa."
  },
  {
   "id": 110,
@@ -1774,11 +1836,12 @@
   },
   "choose": 2,
   "answer": [
-   "B",
+   "C",
    "D"
   ],
-  "explanation": "B. Configure the web server to upload the original images to Amazon S3.\nD. Configure S3 Event Notifications to invoke an AWS Lambda function when an image is uploaded. Use the function to resize the image.",
-  "confident": true
+  "explanation": "Upload chậm vì ảnh phải đi qua web server rồi mới resize. C: trình duyệt upload thẳng lên S3 bằng presigned URL → web server không còn gánh việc nhận file. D: S3 Event Notification gọi Lambda resize sau khi upload → tách rời (decouple), serverless. B (đáp án của file nguồn): web server vẫn nhận toàn bộ ảnh rồi mới đẩy lên S3 → vẫn chậm, chưa giảm coupling; đa số tài liệu chọn C+D. A: Glacier là lưu trữ lạnh. E: resize theo lịch → không xử lý ngay.",
+  "confident": true,
+  "manual": true
  },
  {
   "id": 111,
@@ -1794,7 +1857,8 @@
    "D"
   ],
   "explanation": "D. Use Amazon MQ with active/standby brokers configured across two Availability Zones. Add an Auto Scaling group for the consumer EC2 instances across two Availability Zones. Use Amazon RDS for MySQL with Multi-AZ enabled.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "HA cao nhất cho cả 3 tầng → Amazon MQ active/standby 2 AZ (broker), consumer chạy ASG 2 AZ (tự thay instance hỏng), RDS MySQL Multi-AZ (failover tự động). A: tự quản ActiveMQ/MySQL. B: MySQL tự replicate. C: chỉ thêm 1 instance consumer, không tự thay khi hỏng."
  },
  {
   "id": 112,
@@ -1810,7 +1874,8 @@
    "A"
   ],
   "explanation": "A. Use AWS Fargate on Amazon Elastic Container Service (Amazon ECS) to run the containerized web application with Service Auto Scaling. Use an Application Load Balancer to distribute the incoming requests.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Đã là container, ít sửa code, ít vận hành → ECS trên Fargate + Service Auto Scaling + ALB. B: 2 EC2 cố định không scale, phải tự quản. C: phải viết lại code cho Lambda. D: HPC không phù hợp web app."
  },
  {
   "id": 113,
@@ -1826,7 +1891,8 @@
    "C"
   ],
   "explanation": "C. Order an AWS Snowball Edge Storage Optimized device. Copy the data to the device. Create a custom transformation job by using AWS Glue.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không còn băng thông mạng → chuyển offline bằng Snowball Edge Storage Optimized (50 TB). Job biến đổi chạy tiếp trên AWS bằng Glue (serverless) → ít vận hành. A: DataSync cần băng thông mạng. B: Snowcone chỉ vài TB. D: chọn bản có EC2 không cần thiết, và tự quản EC2 trên AWS thêm overhead."
  },
  {
   "id": 114,
@@ -1842,7 +1908,8 @@
    "C"
   ],
   "explanation": "C. Use AWS Lambda to process the photos. Store the photos in Amazon S3. Retain DynamoDB to store the metadata.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Ảnh lớn không nên lưu trong DynamoDB (giới hạn item 400 KB) → lưu ảnh ở S3, metadata ở DynamoDB, xử lý ảnh bằng Lambda tự scale theo số user. A: lưu ảnh vào DynamoDB. B: Firehose là streaming, không xử lý ảnh. D: số EC2 cố định, EBS không share."
  },
  {
   "id": 115,
@@ -1858,7 +1925,8 @@
    "C"
   ],
   "explanation": "C. Move the EC2 instances to private subnets. Create a VPC endpoint for Amazon S3, and link the endpoint to the route table for the private subnets.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Traffic tới S3 phải đi đường private → đưa EC2 vào private subnet + VPC endpoint cho S3 gắn vào route table. A: NAT gateway vẫn ra internet. B: security group chỉ lọc đích, traffic vẫn qua internet gateway. D: Direct Connect là cho on-prem, quá phức tạp."
  },
  {
   "id": 116,
@@ -1876,7 +1944,8 @@
    "D"
   ],
   "explanation": "A. Configure Amazon CloudFront in front of the website to use HTTPS functionality.\nD. Create the new website and an Amazon S3 bucket. Deploy the website on the S3 bucket with static website hosting enabled.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Website tĩnh, cập nhật 4 lần/năm, ít vận hành → host trên S3 static website (D), CloudFront phía trước cho HTTPS + scale + bảo mật (A). B: WAF không cung cấp HTTPS. C: Lambda serve nội dung tĩnh là thừa. E: EC2 + ALB phải patch, quản lý."
  },
  {
   "id": 117,
@@ -1908,7 +1977,8 @@
    "D"
   ],
   "explanation": "D. Amazon S3",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "900 TB tài liệu, cần scale theo nhu cầu, rẻ nhất → S3 (không giới hạn, trả theo dùng, nhiều EC2 truy cập được). A: EBS gắn 1 AZ, giới hạn dung lượng. B: EFS đắt hơn S3 nhiều. C: OpenSearch để tìm kiếm, đắt cho lưu trữ khối lớn."
  },
  {
   "id": 119,
@@ -1924,7 +1994,8 @@
    "B"
   ],
   "explanation": "B. Set up AWS Firewall Manager in both Regions. Centrally configure AWS WAF rules.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chống SQLi/XSS = WAF. Nhiều account + nhiều Region, ít công quản trị → Firewall Manager áp WAF rule tập trung. A: phải cấu hình WAF riêng từng account/Region. C/D: Shield chống DDoS, không chống SQLi/XSS."
  },
  {
   "id": 120,
@@ -1956,7 +2027,8 @@
    "A"
   ],
   "explanation": "A. Encrypt a copy of the latest DB snapshot. Replace existing DB instance by restoring the encrypted snapshot.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không thể bật mã hóa trực tiếp cho RDS đang chạy. Cách làm: copy snapshot với mã hóa bật → restore thành DB instance mới đã mã hóa → snapshot sau này cũng mã hóa. B: không copy snapshot RDS vào EBS. C: không restore đè vào instance đang có. D: chỉ mã hóa bản copy trên S3, DB vẫn không mã hóa."
  },
  {
   "id": 122,
@@ -1972,7 +2044,8 @@
    "B"
   ],
   "explanation": "B. Use AWS Key Management Service (AWS KMS) to protect the encryption keys.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Hạ tầng quản lý key có thể scale, ít vận hành → KMS (managed). A/D: MFA/IAM chỉ là biện pháp bảo vệ, không phải hệ thống quản lý key. C: ACM quản lý chứng chỉ SSL/TLS, không phải key mã hóa dữ liệu."
  },
  {
   "id": 123,
@@ -1988,7 +2061,8 @@
    "D"
   ],
   "explanation": "D. Import the SSL certificate into AWS Certificate Manager (ACM). Create an Application Load Balancer with an HTTPS listener that uses the SSL certificate from ACM.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "SSL làm EC2 quá tải → offload SSL termination sang ALB: import chứng chỉ của công ty vào ACM, gắn vào HTTPS listener. A: chứng chỉ ACM không cài lên EC2 được, và vẫn giải mã trên EC2. B: S3 không làm SSL termination. C: 1 EC2 proxy là single point of failure, tự quản."
  },
  {
   "id": 124,
@@ -2004,7 +2078,8 @@
    "A"
   ],
   "explanation": "A. Implement EC2 Spot Instances.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Job stateless, dừng/chạy lại bất cứ lúc nào không sao → Spot Instances rẻ tới ~90%. B: RI cho tải ổn định dài hạn. C: On-Demand đắt hơn. D: Lambda tối đa 15 phút, job chạy hơn 60 phút."
  },
  {
   "id": 125,
@@ -2037,7 +2112,8 @@
    "B"
   ],
   "explanation": "B. Set up an S3 Lifecycle policy to transition objects to S3 Glacier Deep Archive after 2 years.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "2 năm gần nhất cần lấy ngay → giữ S3 Standard; sau 2 năm chuyển Glacier Deep Archive (rẻ nhất cho lưu 25 năm). A: chuyển ngay thì dữ liệu mới không lấy ngay được. C: Intelligent-Tiering chỉ archive khi không truy cập, không đúng mốc 2 năm. D: One Zone-IA không HA."
  },
  {
   "id": 127,
@@ -2069,7 +2145,8 @@
    "B"
   ],
   "explanation": "B. Use Spot Instances in an Amazon Elastic Kubernetes Service (Amazon EKS) managed node group.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Container stateless, chịu gián đoạn → Spot để giảm chi phí; EKS managed node group để AWS lo vòng đời node (ít vận hành). A: tự chạy container trên ASG EC2 → tự quản orchestration. C/D: On-Demand đắt hơn."
  },
  {
   "id": 129,
@@ -2087,7 +2164,8 @@
    "E"
   ],
   "explanation": "A. Migrate the PostgreSQL database to Amazon Aurora.\nE. Migrate the web application to be hosted on AWS Fargate with Amazon Elastic Container Service (Amazon ECS).",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giảm vận hành + capacity planning → PostgreSQL sang Aurora (managed, tự giãn storage) và container sang Fargate trên ECS (không quản server). B: EC2 vẫn phải tự quản. C/D: CloudFront/ElastiCache cải thiện hiệu năng nhưng không giảm vận hành hạ tầng."
  },
  {
   "id": 130,
@@ -2103,7 +2181,8 @@
    "B"
   ],
   "explanation": "B. Use a target tracking policy to dynamically scale the Auto Scaling group.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giữ CPU quanh 40% → target tracking policy (đặt mục tiêu 40%, ASG tự thêm/bớt). A: simple scaling theo bước, không giữ được mục tiêu. C: tự viết Lambda. D: scheduled theo giờ, không theo tải thực."
  },
  {
   "id": 131,
@@ -2119,7 +2198,8 @@
    "D"
   ],
   "explanation": "D. Create an origin access identity (OAI). Assign the OAI to the CloudFront distribution. Configure the S3 bucket permissions so that only the OAI has read permission.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chỉ cho truy cập file qua CloudFront, chặn URL S3 trực tiếp → Origin Access Identity (nay là OAC) và bucket policy chỉ cho OAI đọc. A: chung chung, không chỉ ra cách xác định CloudFront. B: CloudFront không dùng IAM user. C: distribution ID không phải principal hợp lệ."
  },
  {
   "id": 132,
@@ -2135,7 +2215,8 @@
    "A"
   ],
   "explanation": "A. Amazon CloudFront and Amazon S3",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "File báo cáo tải về, toàn cầu, rẻ, ít hạ tầng, nhanh nhất → S3 lưu file + CloudFront cache tại edge. B: DynamoDB không dùng để chứa file. C: EC2 phải quản lý, đắt hơn. D: ALB internal không phục vụ được người dùng internet."
  },
  {
   "id": 133,
@@ -2151,7 +2232,8 @@
    "C"
   ],
   "explanation": "C. Migrate the Oracle database to Amazon RDS Custom for Oracle. Create a read replica for the database in another AWS Region.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Cần truy cập OS bên dưới + managed → RDS Custom for Oracle. DR → read replica ở Region khác. A: EC2 tự quản nhiều. B/D: RDS for Oracle thường không cho truy cập OS; D chỉ khác AZ, không phải DR khác Region."
  },
  {
   "id": 134,
@@ -2167,7 +2249,8 @@
    "A"
   ],
   "explanation": "A. Create a new S3 bucket. Load the data into the new S3 bucket. Use S3 Cross-Region Replication (CRR) to replicate encrypted objects to an S3 bucket in another Region. Use server-side encryption with AWS KMS multi-Region kays (SSE-KMS). Use Amazon Athena to query the data.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Serverless + SQL trên S3 → Athena. Mã hóa + replicate khác Region → SSE-KMS multi-Region key (cùng key ID ở cả hai Region, giải mã dễ). Tạo bucket mới vì CRR chỉ áp cho object mới tải lên sau khi bật. B/D: RDS không query trực tiếp S3, không serverless. C: dùng bucket cũ thì dữ liệu cũ không được CRR tự động sao chép."
  },
  {
   "id": 135,
@@ -2183,7 +2266,8 @@
    "D"
   ],
   "explanation": "D. Ask the provider to create a VPC endpoint for the target service. Use AWS PrivateLink to connect to the target service.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Kết nối private, chỉ tới đúng service, chỉ khởi tạo từ phía công ty → PrivateLink: provider tạo endpoint service, công ty tạo interface endpoint. A: peering mở cả VPC, hai chiều. B: virtual private gateway dùng cho VPN, không phải PrivateLink. C: NAT gateway đi qua internet."
  },
  {
   "id": 136,
@@ -2201,7 +2285,8 @@
    "C"
   ],
   "explanation": "A. Create an ongoing replication task.\nC. Create an AWS Database Migration Service (AWS DMS) replication server.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "On-prem vẫn chạy và Aurora phải đồng bộ → DMS: tạo replication instance/server (C) + task full load + ongoing replication (CDC) (A). B: backup chỉ là ảnh chụp 1 lần. D: PostgreSQL → Aurora PostgreSQL cùng engine, không cần SCT. E: EventBridge không đồng bộ dữ liệu."
  },
  {
   "id": 137,
@@ -2217,7 +2302,8 @@
    "B"
   ],
   "explanation": "B. Configure all AWS account root user email addresses as distribution lists that go to a few administrators who can respond to alerts.\nConfigure AWS account alternate contacts in the AWS Organizations console or programmatically.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không bỏ lỡ thông báo, chỉ admin nhận → email root là distribution list tới vài admin + cấu hình alternate contacts (billing, operations, security). A: gửi cho tất cả user là quá rộng. C: 1 người là single point of failure. D: các account không thể dùng chung 1 email root."
  },
  {
   "id": 138,
@@ -2233,7 +2319,8 @@
    "B"
   ],
   "explanation": "B. Migrate the queue to a redundant pair (active/standby) of RabbitMQ instances on Amazon MQ. Create a Multi-AZ Auto Scaling group for EC2 instances that host the application. Migrate the database to run on a Multi-AZ deployment of Amazon RDS for PostgreSQL.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "HA cao nhất, ít vận hành → dùng dịch vụ managed cho từng tầng: Amazon MQ (RabbitMQ active/standby), ASG Multi-AZ cho app, RDS PostgreSQL Multi-AZ. A: PostgreSQL trên ASG EC2 không replicate dữ liệu được. C/D: tự quản RabbitMQ trên EC2; D còn tự quản DB."
  },
  {
   "id": 139,
@@ -2267,7 +2354,8 @@
    "C"
   ],
   "explanation": "A. Use Spot Instances for the data ingestion layer\nC. Purchase a 1-year Compute Savings Plan for the front end and API layer.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Tầng ingest EC2 thất thường và chịu gián đoạn → Spot (A). Fargate + Lambda dùng ổn định 1 năm → Compute Savings Plan (C) vì nó áp cho cả EC2, Fargate, Lambda. E: EC2 Instance Savings Plan chỉ áp cho EC2. B: On-Demand đắt hơn Spot. D: RI không hợp tải thất thường."
  },
  {
   "id": 141,
@@ -2283,7 +2371,8 @@
    "B"
   ],
   "explanation": "B. Deploy the application stack in two AWS Regions. Use an Amazon Route 53 latency routing policy to serve all content from the ALB in the closest Region.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Nội dung cá nhân hóa (động), người dùng toàn cầu → triển khai 2 Region + Route 53 latency routing đưa user tới Region gần nhất. D: geolocation route theo vị trí địa lý, không theo latency thực. C: nội dung động vẫn đi xa về 1 Region. A: CloudFront cũng tăng tốc được nội dung động và nhiều người chọn A; đáp án nguồn chọn B vì nội dung cá nhân hóa khó cache, xử lý vẫn phải về 1 Region."
  },
  {
   "id": 142,
@@ -2299,7 +2388,8 @@
    "C"
   ],
   "explanation": "C. Configure AWS Global Accelerator to forward requests to a Network Load Balancer. Use Amazon EC2 instances for the application in an EC2 Auto Scaling group.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "UDP + static IP + đi qua edge gần nhất → Global Accelerator (hỗ trợ TCP/UDP, 2 IP anycast tĩnh) trỏ tới NLB (layer 4, UDP); EC2 vì app chạy kernel Linux tùy chỉnh. A/D: ALB và API Gateway chỉ HTTP/HTTPS. B: CloudFront không hỗ trợ UDP; Lambda không chạy kernel tùy chỉnh."
  },
  {
   "id": 143,
@@ -2315,7 +2405,8 @@
    "D"
   ],
   "explanation": "D. Host the application on Amazon Elastic Container Service (Amazon ECS). Set up an Application Load Balancer with Amazon ECS as the target.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giữ nhiều code, tách thành ứng dụng nhỏ cho từng team, scale tốt, ít vận hành → đóng gói container chạy trên ECS + ALB. A/B: Lambda/Amplify buộc viết lại code nhiều. C: EC2 phải tự quản, khó tách thành service nhỏ."
  },
  {
   "id": 144,
@@ -2331,7 +2422,8 @@
    "B"
   ],
   "explanation": "B. Migrate the monthly reporting to an Aurora Replica.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Report làm nặng ReadIOPS/CPU → chuyển report sang Aurora Replica (chung storage, rẻ). A: Redshift tốn thêm chi phí và công migrate. C: instance lớn hơn đắt hơn. D: Aurora không có Provisioned IOPS như vậy."
  },
  {
   "id": 145,
@@ -2363,7 +2455,8 @@
    "B"
   ],
   "explanation": "B. Use Reserved Instances for the baseline level of usage. Use Spot instances for any additional capacity that the application needs.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Phần nền luôn chạy → Reserved Instances (rẻ). Phần tăng thêm giờ cao điểm, app stateless → Spot. A: chỉ Spot có thể mất hết capacity → ảnh hưởng availability. C: On-Demand cho phần nền đắt hơn RI. D: Dedicated đắt."
  },
  {
   "id": 147,
@@ -2379,7 +2472,8 @@
    "B"
   ],
   "explanation": "B. Store the logs in Amazon S3. Use S3 Lifecycle policies to move logs more than 1 month old to S3 Glacier Deep Archive.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Log 10 TB/tháng, lưu 10 năm, sau 1 tháng ít truy cập → lưu S3 + Lifecycle sang Glacier Deep Archive. A: AWS Backup không chuyển storage class của object S3. C/D: CloudWatch Logs đắt cho khối lượng lớn; Lifecycle S3 không áp lên CloudWatch Logs."
  },
  {
   "id": 148,
@@ -2395,7 +2489,8 @@
    "D"
   ],
   "explanation": "D. Configure an Amazon Simple Queue Service (Amazon SQS) queue as the on-failure destination. Modify the Lambda function to process messages in the queue.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Lỗi mạng làm mất dữ liệu → cấu hình SQS làm on-failure destination: sự kiện lỗi được giữ lại để xử lý sau. A: Lambda vốn đã Multi-AZ. B: thêm CPU/RAM không sửa lỗi mạng. C: retry của SNS có giới hạn, hết retry vẫn mất."
  },
  {
   "id": 149,
@@ -2411,7 +2506,8 @@
    "A"
   ],
   "explanation": "A. Create an Amazon Simple Queue Service (Amazon SQS) FIFO queue to hold messages. Set up an AWS Lambda function to process messages from the queue.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giữ đúng thứ tự + ít vận hành → SQS FIFO + Lambda. B/D: SNS standard không đảm bảo thứ tự. C: SQS standard không giữ thứ tự."
  },
  {
   "id": 150,
@@ -2427,7 +2523,8 @@
    "A"
   ],
   "explanation": "A. Create Amazon CloudWatch composite alarms where possible.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chỉ báo động khi CPU > 50% VÀ read IOPS cao cùng lúc, giảm báo động giả → CloudWatch composite alarm (kết hợp nhiều alarm bằng AND/OR). B: dashboard chỉ để xem. C: Synthetics kiểm tra endpoint, không phải metric hạ tầng. D: một metric alarm chỉ theo dõi một metric."
  },
  {
   "id": 151,
@@ -2462,7 +2559,8 @@
    "D"
   ],
   "explanation": "D. Create AWS Lambda functions to start and stop the DB instance. Create Amazon EventBridge (Amazon CloudWatch Events) scheduled rules to invoke the Lambda functions. Configure the Lambda functions as event targets for the rules.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "DB chỉ dùng 12h/ngày → tắt/bật DB theo lịch: EventBridge lịch gọi Lambda start/stop RDS. A: Session Manager là để vào máy, không dùng start/stop RDS. B: thêm ElastiCache tốn thêm tiền. C: EC2 chạy cron cũng tốn tiền và tự quản."
  },
  {
   "id": 153,
@@ -2478,7 +2576,8 @@
    "D"
   ],
   "explanation": "D. Implement an S3 Lifecycle policy that moves the objects from S3 Standard to S3 Standard-Infrequent Access (S3 Standard-1A) after 90 days.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Sau 90 ngày ít tải, mốc rõ ràng → Lifecycle từ Standard sang Standard-IA (file ≥128 KB nên hợp IA). A: file mới hay được tải, để IA từ đầu tốn phí retrieval. B: Intelligent-Tiering có phí giám sát mỗi object, không cấu hình được \"sau 90 ngày\". C: S3 Inventory chỉ liệt kê, không chuyển class."
  },
  {
   "id": 154,
@@ -2494,7 +2593,8 @@
    "B"
   ],
   "explanation": "B. Use S3 Object Lock in compliance mode with a retention period of 365 days.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không ai được sửa/xóa, giữ tối thiểu 1 năm → Object Lock compliance mode, retention 365 ngày. A: governance mode cho phép người có quyền đặc biệt gỡ; legal hold không có thời hạn. C: IAM có thể bị thay đổi. D: chỉ phát hiện sau khi đã sửa."
  },
  {
   "id": 155,
@@ -2510,7 +2610,8 @@
    "C"
   ],
   "explanation": "C. Deploy Amazon CloudFront to connect the S3 buckets to CloudFront edge servers.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Phân phối nhanh toàn cầu, cache nội dung S3 → CloudFront (edge location). A: DataSync để chuyển dữ liệu. B: Global Accelerator không cache. D: SQS là hàng đợi message."
  },
  {
   "id": 156,
@@ -2525,10 +2626,11 @@
   "choose": 2,
   "answer": [
    "A",
-   "C"
+   "E"
   ],
-  "explanation": "A. Use Amazon Athena for one-time queries. Use Amazon QuickSight to create dashboards for KPIs.\nC. Create custom AWS Lambda functions to move the individual records from the databases to an Amazon Redshift cluster.",
-  "confident": true
+  "explanation": "Gom dữ liệu batch + stream vào một chỗ, stage ở S3, ít vận hành. E: Lake Formation blueprints + Glue crawler/ETL tự đưa dữ liệu vào S3 dạng Parquet (data lake). A: Athena query một lần trực tiếp trên S3, QuickSight làm dashboard KPI. C (đáp án của file nguồn): tự viết Lambda chuyển từng bản ghi sang Redshift → nhiều code, không stage vào S3 như đề yêu cầu. B: Kinesis Data Analytics cho dữ liệu streaming, không dùng cho query một lần. D: nhiều cụm OpenSearch → tốn vận hành.",
+  "confident": true,
+  "manual": true
  },
  {
   "id": 157,
@@ -2616,7 +2718,8 @@
    "B"
   ],
   "explanation": "B. Place the JSON documents in an Amazon S3 bucket. Create an AWS Lambda function that runs the Python code to process the documents as they arrive in the S3 bucket. Store the results in an Amazon Aurora DB cluster.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chạy hàng nghìn lần/ngày, HA, scale, ít vận hành → S3 nhận file, Lambda xử lý theo event, kết quả lưu Aurora. A/C/D: tự quản EC2/ECS trên EC2; C dùng EBS Multi-Attach phức tạp."
  },
  {
   "id": 162,
@@ -2632,7 +2735,8 @@
    "A"
   ],
   "explanation": "A. Amazon FSx for Lustre integrated with Amazon S3",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "HPC Linux, file system hiệu năng cao, gắn với lưu trữ lâu dài → FSx for Lustre tích hợp S3 (đọc/ghi dữ liệu từ S3). B: FSx for Windows cho SMB/Windows. C/D: Glacier/EBS không phải file system hiệu năng cao dùng chung cho hàng trăm instance."
  },
  {
   "id": 163,
@@ -2648,7 +2752,8 @@
    "A"
   ],
   "explanation": "A. Store container images in an Amazon Elastic Container Registry (Amazon ECR) repository. Use an Amazon Elastic Container Service (Amazon ECS) cluster with the AWS Fargate launch type to run the containers. Use target tracking to scale automatically based on demand.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Container, HA, ít vận hành → ECR lưu image + ECS Fargate + target tracking. B: EC2 launch type phải quản lý instance. C/D: tự dựng registry/EC2 → nhiều vận hành."
  },
  {
   "id": 164,
@@ -2664,7 +2769,8 @@
    "C"
   ],
   "explanation": "C. Integrate the sender and processor applications with an Amazon Simple Queue Service (Amazon SQS) queue. Configure a dead-letter queue to collect the messages that failed to process.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Xử lý có thể mất 2 ngày, message lỗi phải giữ lại mà không chặn các message khác → SQS (giữ tới 14 ngày) + dead-letter queue. A: Redis trên EC2 tự quản. B: Kinesis giữ thứ tự theo shard, một record lỗi chặn các record sau. D: SNS không lưu message."
  },
  {
   "id": 165,
@@ -2680,7 +2786,8 @@
    "D"
   ],
   "explanation": "D. Configure Amazon CloudFront and Amazon S3 to use an origin access identity (OAI) to restrict access to the S3 bucket. Enable AWS WAF on the distribution.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Bắt buộc mọi traffic qua WAF → gắn WAF vào CloudFront, và OAI để S3 chỉ cho CloudFront đọc (không vào thẳng S3 được). A: WAF không có ARN để làm nguồn request. B: CloudFront không \"forward\" sang WAF; WAF gắn trực tiếp vào distribution. C: S3 không có security group."
  },
  {
   "id": 166,
@@ -2696,7 +2803,8 @@
    "D"
   ],
   "explanation": "D. Use Amazon CloudFront with the S3 bucket as its origin.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Trang tĩnh, hàng triệu lượt xem toàn cầu → CloudFront với origin S3. A: presigned URL dùng cho truy cập tạm thời. B: replicate khắp Region tốn kém, vẫn không có cache edge. C: geoproximity không giảm tải hay tăng tốc nội dung."
  },
  {
   "id": 167,
@@ -2712,7 +2820,8 @@
    "C"
   ],
   "explanation": "C. Use Reserved Instances for the baseline capacity and use Spot Instances to handle additional capacity.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Phải xử lý liên tục, không downtime, tải lúc có lúc không → RI cho phần nền + Spot cho phần tăng thêm (app xử lý song song từ SQS nên Spot bị thu hồi không mất message). A: chỉ Spot có thể không còn capacity → downtime. B: RI cho đỉnh tải → lãng phí. D: On-Demand đắt hơn Spot."
  },
  {
   "id": 168,
@@ -2728,7 +2837,8 @@
    "D"
   ],
   "explanation": "D. Create a service control policy in the root organizational unit to deny access to the services or actions.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giới hạn dịch vụ/hành động cho mọi account, quản lý tại một chỗ → SCP gắn ở root OU. A: ACL không áp cho dịch vụ AWS. B: security group là firewall mạng. C: tạo role từng account → không scale, không tập trung."
  },
  {
   "id": 169,
@@ -2744,7 +2854,8 @@
    "C"
   ],
   "explanation": "C. Enable AWS Shield Advanced to prevent attacks.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giảm rủi ro DDoS cho ALB → Shield Advanced. A: Inspector quét lỗ hổng, không gắn vào ALB. B: Macie dò dữ liệu nhạy cảm S3. D: GuardDuty phát hiện mối đe dọa, không ngăn DDoS."
  },
  {
   "id": 170,
@@ -2760,7 +2871,8 @@
    "C"
   ],
   "explanation": "C. Configure AWS WAF on the Application Load Balancer in a VPC.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chỉ cho truy cập từ 1 quốc gia → WAF trên ALB với geo match rule. A/B/D: security group/NACL lọc theo IP/port, không biết quốc gia."
  },
  {
   "id": 171,
@@ -2776,7 +2888,8 @@
    "B"
   ],
   "explanation": "B. Design a REST API using Amazon API Gateway that accepts the item names. API Gateway passes item names to AWS Lambda for tax computations.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Tải chỉ tăng mùa lễ, cần co giãn → API Gateway + Lambda (tự scale, không trả tiền khi rảnh). A/C/D: EC2 số lượng cố định, không tự co giãn."
  },
  {
   "id": 172,
@@ -2808,7 +2921,8 @@
    "B"
   ],
   "explanation": "B. Deploy an Amazon CloudFront web distribution in front of the S3 bucket.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Nội dung giống nhau cho mọi user, giảm tải origin, rẻ → CloudFront trước S3 (cache tại edge). A: Global Accelerator không cache. C/D: ElastiCache đặt trước web server không phục vụ file media từ S3."
  },
  {
   "id": 174,
@@ -2824,7 +2938,8 @@
    "B"
   ],
   "explanation": "B. Modify the Auto Scaling group to use three instances across each of two Availability Zones.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "HA mà không sửa app → ASG trải 2 AZ (3 instance mỗi AZ). A/C: đa Region phức tạp, cần thêm thay đổi. D: round-robin không giải quyết việc chỉ có 1 AZ."
  },
  {
   "id": 175,
@@ -2840,7 +2955,8 @@
    "B"
   ],
   "explanation": "B. Use Amazon RDS Proxy to create a proxy for the database. Modify the Lambda function to use the RDS Proxy endpoint instead of the database endpoint.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Quá nhiều kết nối mở từ Lambda làm DB nghẽn → RDS Proxy gom/tái dùng kết nối, chỉ đổi endpoint trong Lambda. A: provisioned concurrency còn tăng kết nối; global DB không liên quan. C: replica Region khác không nhận ghi đơn hàng. D: migrate sang DynamoDB là thay đổi lớn."
  },
  {
   "id": 176,
@@ -2856,7 +2972,8 @@
    "A"
   ],
   "explanation": "A. Use a VPC endpoint for DynamoDB.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Private subnet truy cập DynamoDB, không rời mạng AWS → VPC endpoint (gateway) cho DynamoDB. B/C/D: NAT/internet gateway đều đi ra internet."
  },
  {
   "id": 177,
@@ -2872,7 +2989,8 @@
    "B"
   ],
   "explanation": "B. Use Amazon DynamoDB Accelerator (DAX).",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "DynamoDB đọc nhiều, chậm, không muốn sửa app → DAX (cache in-memory tương thích API DynamoDB, gần như không đổi code). A/D: ElastiCache phải viết lại logic cache trong app. C: global tables để đa Region, không tăng tốc đọc tại chỗ."
  },
  {
   "id": 178,
@@ -2924,7 +3042,8 @@
    "C"
   ],
   "explanation": "B. Use AWS Shield Advanced with the NLB.\nC. Use AWS WAF to protect Amazon API Gateway.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "SQL injection → WAF, gắn được vào API Gateway (C), WAF không gắn được vào NLB (A sai). DDoS lớn, tinh vi → Shield Advanced bảo vệ NLB (B). D/E: Shield Standard chỉ bảo vệ cơ bản, không \"phát hiện và giảm thiểu\" tấn công tinh vi; GuardDuty chỉ phát hiện."
  },
  {
   "id": 181,
@@ -2940,7 +3059,8 @@
    "A"
   ],
   "explanation": "A. Create an Amazon Simple Queue Service (Amazon SQS) queue. Add code to the data producers, and send data to the queue. Add code to the data consumers to process data from the queue.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Microservice trao đổi dữ liệu, thứ tự không quan trọng → SQS queue: producer gửi, consumer xử lý độc lập, scale riêng. B: SNS đẩy cho mọi subscriber, không giữ message khi consumer bận. C: Lambda làm trung gian truyền message là thiết kế lạ, không lưu message. D: dùng DynamoDB Streams như hàng đợi là phức tạp không cần."
  },
  {
   "id": 182,
@@ -2956,7 +3076,8 @@
    "B"
   ],
   "explanation": "B. Create an Amazon RDS MySQL DB instance with Multi-AZ functionality enabled to synchronously replicate the data.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Mỗi giao dịch ghi trên ít nhất 2 node, ít mất dữ liệu → RDS MySQL Multi-AZ (replicate đồng bộ sang standby). A: RDS instance không có kiểu sync 3 node như mô tả. C: read replica replicate bất đồng bộ. D: tự chế, phức tạp."
  },
  {
   "id": 183,
@@ -2972,7 +3093,8 @@
    "A"
   ],
   "explanation": "A. Host static content in Amazon S3. Host dynamic content by using Amazon API Gateway and AWS Lambda. Use Amazon DynamoDB with on-demand capacity for the database. Configure Amazon CloudFront to deliver the website content.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Ít bảo trì server, HA, scale đọc/ghi nhanh nhất → S3 + CloudFront (tĩnh), API Gateway + Lambda (động), DynamoDB on-demand (scale ghi ngay). B: Aurora Auto Scaling chỉ thêm replica đọc, không scale ghi nhanh. C/D: EC2 phải patch; C provisioned capacity không đáp ứng nhanh."
  },
  {
   "id": 184,
@@ -3005,7 +3127,8 @@
    "B"
   ],
   "explanation": "B. Create an IAM role with S3 permissions, and then specify that role as the taskRoleArn in the task definition.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Container trong ECS cần quyền S3 → tạo IAM role, khai báo trong task definition (taskRoleArn). A: không có \"S3 role\" sẵn như vậy. C: security group không cấp quyền API. D: dùng IAM user/credential trong máy là anti-pattern."
  },
  {
   "id": 186,
@@ -3039,7 +3162,8 @@
    "D"
   ],
   "explanation": "A. Create an Amazon RDS DB instance in Multi-AZ mode.\nD. Create an Amazon Elastic Container Service (Amazon ECS) cluster with a Fargate launch type to handle the dynamic application load.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "HA, ít can thiệp thủ công → RDS Multi-AZ (failover tự động) + ECS Fargate (không quản server). B: read replica phải promote thủ công. C/E: tự quản EC2 cluster."
  },
  {
   "id": 188,
@@ -3537,7 +3661,8 @@
    "A"
   ],
   "explanation": "A. Deploy the application with the required infrastructure elements in place. Use Amazon Route 53 to configure active-passive failover. Create an Aurora Replica in a second AWS Region.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chịu được 30 phút downtime, không cần Region 2 phục vụ tải khi bình thường → active-passive (Route 53 failover) với hạ tầng sẵn sàng + Aurora Replica ở Region 2 (promote khi sự cố). B/C: active-active là phục vụ tải ở cả 2 nơi → thừa. D: dựng hạ tầng từ backup lâu; Aurora không có \"second primary\"."
  },
  {
   "id": 218,
@@ -3555,7 +3680,8 @@
    "E"
   ],
   "explanation": "A. Create a security group with a rule to allow TCP port 443 from source 0.0.0.0/0.\nE. Update the network ACL to allow inbound TCP port 443 from source 0.0.0.0/0 and outbound TCP port 32768-65535 to destination 0.0.0.0/0.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Security group (stateful): chỉ cần inbound 443 từ 0.0.0.0/0 (A). NACL (stateless) đang chặn hết → mở inbound 443 và outbound cổng tạm 32768-65535 cho phản hồi (E). B: rule outbound không cho phép truy cập vào. C: thiếu outbound. D: phản hồi đi từ cổng 443 ra cổng tạm của client, không phải ra cổng 443."
  },
  {
   "id": 219,
@@ -4113,7 +4239,8 @@
    "A"
   ],
   "explanation": "A. Amazon Elastic File System (Amazon EFS)\n253]\npolicy que.\nC. Deleting Amazon EC2 instances.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Nhiều EC2 cùng truy cập đồng thời, dung lượng tăng dần, có dự phòng sẵn → EFS (nhiều AZ, tự giãn). B: EBS gắn 1 instance, 1 AZ. C: Deep Archive không truy cập ngay. D: AWS Backup là dịch vụ backup, không phải nơi lưu file."
  },
  {
   "id": 253,
@@ -4128,9 +4255,10 @@
   "answer": [
    "C"
   ],
-  "explanation": "Đề gốc kèm ảnh nội dung Policy1/Policy2 (bị mất khi trích PDF). Theo đáp án phổ biến: Policy1 cho phép rộng (iam/ec2/ds/logs), Policy2 Deny tường minh các thao tác xóa IAM user, directory và CloudWatch Logs. Explicit Deny luôn thắng Allow → chỉ còn xóa EC2 instance. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny.",
+  "explanation": "Policy1 chỉ cho xem (Get/List/Describe) với IAM và CloudWatch Logs, nhưng cho toàn quyền ec2:* và ds:*. Policy2 Deny tường minh ds:Delete*. Explicit Deny luôn thắng Allow → không xóa được directory (B). A: IAM chỉ có Get/List, không có DeleteUser. D: Logs chỉ có Get/Describe. Còn lại xóa EC2 instance (ec2:*) → C. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny.",
   "confident": true,
-  "manual": true
+  "manual": true,
+  "note": "Hình 2 policy bị mất khi trích PDF. Policy1: Allow iam:Get*, iam:List*, kms:List*, ec2:*, ds:*, logs:Get*, logs:Describe* trên mọi resource. Policy2: Deny ds:Delete* trên mọi resource."
  },
  {
   "id": 254,
@@ -4229,7 +4357,8 @@
    "A"
   ],
   "explanation": "A. Create a backup vault in AWS Backup to retain RDS backups. Create a new backup plan with a daily schedule and an expiration period of 2 years after creation. Assign the RDS DB instances to the backup plan.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Backup hằng ngày, giữ 2 năm → AWS Backup plan lịch hằng ngày, expire sau 2 năm. B: automated backup RDS giữ tối đa 35 ngày; DLM dành cho EBS. C: log giao dịch trên CloudWatch không phải backup khôi phục được. D: DMS là migrate/replicate, không phải backup."
  },
  {
   "id": 260,
@@ -4361,7 +4490,8 @@
    "D"
   ],
   "explanation": "D. Create an Amazon Kinesis Data Firehose delivery stream to store the data in Amazon S3. Create an Amazon Kinesis Data Analytics application to analyze the data.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Near-real time, mã hóa, lưu Parquet tập trung, ít vận hành → Firehose (chuyển sang Parquet, mã hóa, đổ vào S3) + Kinesis Data Analytics phân tích. A/B: Data Streams không tự lưu vào S3; thêm Lambda. B/C: EMR phải quản lý cluster."
  },
  {
   "id": 268,
@@ -4409,7 +4539,8 @@
    "A"
   ],
   "explanation": "A. Use client-side encryption to encrypt the data that is being uploaded to the S3 buckets.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Phải mã hóa TRƯỚC khi upload (và mã hóa đường truyền) → client-side encryption. B/C/D: server-side chỉ mã hóa sau khi dữ liệu tới S3."
  },
  {
   "id": 271,
@@ -4490,7 +4621,8 @@
    "C"
   ],
   "explanation": "C. Implement a target tracking action triggered at a lower CPU threshold, and decrease the cooldown period.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Sáng ra chậm vì ASG scale lên chưa kịp. Target tracking với ngưỡng CPU thấp hơn + giảm cooldown giúp scale sớm và nhanh hơn mà vẫn theo tải thực → tiết kiệm. A: luôn bật 20 instance từ sáng có thể thừa (nhiều người cũng chọn A, nhưng tốn hơn). B: step scaling kém mượt hơn target tracking. D: khóa min=max=20 cả ngày → không scale xuống được, tốn kém."
  },
  {
   "id": 276,
@@ -4753,7 +4885,8 @@
    "B"
   ],
   "explanation": "A. Signed cookies\nB. Signed URLs",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Client không hỗ trợ cookie → dùng signed URL (B). User không đổi được URL đã hard-code → dùng signed cookie (A), URL giữ nguyên. C: AppSync là GraphQL. D: JWT không phải cơ chế bảo vệ có sẵn của CloudFront. E: Secrets Manager lưu secret."
  },
  {
   "id": 292,
@@ -4787,7 +4920,8 @@
    "D"
   ],
   "explanation": "D. Use AWS Storage Gateway and configure a stored volume gateway. Run the Storage Gateway software appliance on premises and map the gateway storage volumes to on-premises storage. Mount the gateway storage volumes to provide local access to the data.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Cần truy cập cục bộ TOÀN BỘ dữ liệu + tự động backup lên AWS → Storage Gateway stored volume (dữ liệu chính ở on-prem, snapshot lên AWS). C: cached volume chỉ giữ một phần dữ liệu ở local. A/B: Snowball là chuyển dữ liệu một lần, không phải backup liên tục."
  },
  {
   "id": 294,
@@ -4967,7 +5101,8 @@
    "A"
   ],
   "explanation": "A. Use AWS DataSync.\nIf we want to transfer large amount of data we can used AWS Datasync.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chuyển định kỳ lượng lớn dữ liệu giữa NFS ở 2 Region, ít vận hành → DataSync (hỗ trợ NFS/EFS, có lịch). B: Snowball cho chuyển offline. C: tự dựng SFTP. D: DMS cho database."
  },
  {
   "id": 305,
@@ -5180,7 +5315,8 @@
    "A"
   ],
   "explanation": "A. Create an AWS Glue extract, transform, and load (ETL) job that runs on a schedule. Configure the ETL job to process the .csv files and store the processed data in Amazon Redshift.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "COTS chỉ đọc Redshift/S3, không đọc được CSV, ít vận hành → Glue ETL (serverless) chạy theo lịch, chuyển CSV vào Redshift. B: script trên EC2 tự quản. C: COTS không đọc được DynamoDB. D: EMR phải dựng cluster."
  },
  {
   "id": 318,
@@ -5278,7 +5414,8 @@
    "B"
   ],
   "explanation": "B. Create an HTTPS endpoint in Amazon API Gateway. Configure the API Gateway endpoint to invoke an AWS Lambda function to process the messages and save the results to an Amazon DynamoDB table.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Nhận message HTTPS, HA, lưu để phân tích → API Gateway (endpoint HTTPS) + Lambda + DynamoDB, đều managed và HA. A: 1 EC2 là single point of failure. C: Route 53 là DNS, không gọi Lambda. D: phải dựng VPN, sensor ghi thẳng vào S3 phức tạp."
  },
  {
   "id": 324,
@@ -5377,7 +5514,8 @@
    "D"
   ],
   "explanation": "D. Turn on Amazon Inspector in the account. Configure Amazon Inspector to scan the EC2 instances for software vulnerabilities. Set up AWS Systems Manager Patch Manager to patch the EC2 instances on a regular schedule.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Quét lỗ hổng EC2 → Inspector; patch theo lịch và báo cáo trạng thái → Systems Manager Patch Manager. A: Macie dò dữ liệu nhạy cảm S3. B: GuardDuty phát hiện mối đe dọa, không quét lỗ hổng; Session Manager không lập lịch patch. C: Detective dùng điều tra sự cố."
  },
  {
   "id": 330,
@@ -5521,7 +5659,8 @@
    "D"
   ],
   "explanation": "D. Set up an Aurora global database for the DB cluster. Specify a minimum of one DB instance in the secondary Region.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "DR sang Region khác, rẻ nhất → Aurora global database (replication bằng storage, nhanh) với ít nhất 1 instance ở Region phụ để có thể promote. B: bỏ instance ở Region phụ thì khi sự cố không có gì để failover nhanh. A/C: binlog/DMS tự quản, chậm hơn."
  },
  {
   "id": 339,
@@ -5602,7 +5741,8 @@
    "C"
   ],
   "explanation": "C. Migrate the MySQL database to an Amazon Aurora global database. Host the primary DB cluster in the primary Region. Host the secondary DB cluster in the DR Region.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "DR nhiều Region, ít vận hành → Aurora global database (cluster chính + cluster phụ ở Region DR). A: tự quản replication trên EC2. B: Multi-AZ chỉ trong 1 Region. D: restore từ backup → RTO/RPO kém, nhiều bước."
  },
  {
   "id": 344,
@@ -5764,7 +5904,8 @@
    "B"
   ],
   "explanation": "B. Use a Multi-AZ deployment of an Amazon RDS for MySQL DB instance with a General Purpose SSD (gp2) EBS volume.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Cần managed + HA (Multi-AZ). 1.000 IOPS, cần chừa gấp đôi → gp2 1 TB đã có baseline 3.000 IOPS (3 IOPS/GB) mà rẻ hơn nhiều so với io2. A: io2 Block Express đắt, thừa. C: S3 không chạy MySQL. D: EC2 tự quản."
  },
  {
   "id": 354,
@@ -6157,7 +6298,8 @@
    "B"
   ],
   "explanation": "B. Use EC2 Auto Scaling lifecycle hooks to run a custom script to send data to the audit system when instances are launched and terminated.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Gửi báo cáo khi instance launch VÀ terminate → lifecycle hooks của ASG (dừng instance ở trạng thái chờ để chạy script). C: user data chỉ chạy lúc khởi động, không chạy lúc terminate. A: chạy theo lịch, không đúng thời điểm. D: ASG không tự gọi script trong OS."
  },
  {
   "id": 378,
@@ -6285,7 +6427,8 @@
    "C"
   ],
   "explanation": "C. Create a security group for the web servers and allow port 443 from the load balancer. Create a security group for the MySQL servers and allow port 3306 from the web servers security group.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Least privilege: web server chỉ nhận 443 từ load balancer (tham chiếu security group của LB), MySQL chỉ nhận 3306 từ security group của web server. A: web mở cho cả internet. B/D: NACL không tham chiếu được security group, và gắn theo subnet."
  },
  {
   "id": 386,
@@ -6402,7 +6545,8 @@
    "A"
   ],
   "explanation": "A. Configure the security group for the web servers to allow inbound traffic on port 443 from 0.0.0.0/0. Configure the security group for the DB instance to allow inbound traffic on port 3306 from the security group of the web servers",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Khách hàng IP động toàn cầu → web mở 443 cho 0.0.0.0/0. DB chỉ nhận 3306 từ security group của web server. B/C: không thể liệt kê IP động của khách. D: mở DB ra internet là không an toàn."
  },
  {
   "id": 393,
@@ -6877,7 +7021,8 @@
    "B"
   ],
   "explanation": "B. Create an encrypted Amazon Elastic File System (Amazon EFS) volume. Create an AWS Transfer Family SFTP service with elastic IP addresses and a VPC endpoint that has internet-facing access. Attach a security group to the endpoint that allows only trusted IP addresses. Attach the EFS volume to the SFTP service endpoint. Grant users access to the SFTP service.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Serverless SFTP → Transfer Family. Shared storage IOPS cao, quyền kiểu Linux user (POSIX) → EFS. Chỉ cho IP tin cậy → VPC endpoint internet-facing + security group (giữ elastic IP). A: EBS không gắn được vào Transfer Family. C/D: S3 không cho quyền POSIX như user Linux; D là endpoint nội bộ, internet không vào được."
  },
  {
   "id": 422,
@@ -6912,7 +7057,8 @@
   ],
   "explanation": "Identity-based policy gắn được vào IAM user, group, role. Organization không phải IAM principal (dùng SCP). Tài nguyên ECS/EC2 không gắn trực tiếp policy — chúng nhận quyền qua role (task role / instance profile). (Đề gốc có ảnh JSON policy bị mất khi trích PDF; đáp án không phụ thuộc nội dung JSON.)",
   "confident": true,
-  "manual": true
+  "manual": true,
+  "note": "Hình JSON policy bị mất khi trích PDF. Câu này hỏi loại principal nào gắn được identity-based policy, nên không cần nội dung JSON để trả lời."
  },
  {
   "id": 424,
@@ -7009,7 +7155,8 @@
   ],
   "explanation": "Đề gốc có ảnh JSON policy (bị mất khi trích PDF). Theo đáp án phổ biến: Statement 1 Allow ec2:* với điều kiện Region us-east-1; Statement 2 Deny ec2:StopInstances và ec2:TerminateInstances khi không có MFA (BoolIfExists aws:MultiFactorAuthPresent=false). Kết quả: mọi action EC2 ở us-east-1, riêng Stop/Terminate cần đăng nhập MFA. Nhớ: mọi statement đều được đánh giá (A sai), explicit Deny thắng Allow.",
   "confident": true,
-  "manual": true
+  "manual": true,
+  "note": "Hình policy bị mất khi trích PDF. Statement 1: Allow ec2:*, Resource *, Condition StringEquals aws:RequestedRegion = us-east-1. Statement 2: Deny ec2:StopInstances và ec2:TerminateInstances, Resource *, Condition BoolIfExists aws:MultiFactorAuthPresent = false."
  },
  {
   "id": 430,
@@ -7027,7 +7174,8 @@
    "C"
   ],
   "explanation": "B. Design an AWS Lambda function that converts the .csv files into images and stores the images in the S3 bucket. Invoke the Lambda function when a .csv file is uploaded. Most Voted\nC. Create S3 Lifecycle rules for .csv files and image files in the S3 bucket. Transition the .csv files from S3 Standard to S3 Glacier 1 day after they are uploaded. Expire the image files after 30 days.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chuyển CSV thành ảnh ngay khi upload → Lambda theo event S3 (B). CSV chỉ dùng 2 lần/năm, có kế hoạch trước → chuyển sang Glacier sau 1 ngày (rẻ, lấy lại mất vài giờ là chấp nhận được); ảnh hết hạn sau 30 ngày (C). A: EC2 mỗi giờ → không \"ngay\". D/E: One Zone-IA/Standard-IA đắt hơn Glacier; RRS đã lỗi thời."
  },
  {
   "id": 431,
@@ -7238,7 +7386,8 @@
    "A"
   ],
   "explanation": "A. Use Amazon S3 with Transfer Acceleration to host the application.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "User toàn cầu upload/download file tới GB, giảm latency, rẻ → S3 Transfer Acceleration (đi qua edge location). B: CacheControl chỉ giúp cache, không tăng tốc upload. C: CloudFront chủ yếu tăng tốc download; EC2 đắt hơn. D: ElastiCache không dành cho file lớn."
  },
  {
   "id": 444,
@@ -7286,7 +7435,8 @@
    "D"
   ],
   "explanation": "D. Turn on S3 Object Lock with compliance retention mode for the S3 bucket. Set the retention period to expire after 7 years. Use S3 Batch Operations to bring the existing data into compliance.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giữ dữ liệu MỚI và CŨ 7 năm, không ai xóa được, ít vận hành → Object Lock compliance mode, retention 7 năm; dữ liệu đã có thì dùng S3 Batch Operations để áp retention hàng loạt. C: copy lại toàn bộ object thủ công tốn công. B: governance mode vẫn cho người có quyền gỡ. A: MFA delete không đảm bảo yêu cầu pháp lý giữ dữ liệu."
  },
  {
   "id": 447,
@@ -7334,7 +7484,8 @@
    "B"
   ],
   "explanation": "B. Migrate the database to Amazon RDS Custom for Oracle. Customize the database settings to support third-party features.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Tính năng bên thứ 3 cần quyền đặc quyền (truy cập OS/DB) nhưng muốn bớt việc quản trị → RDS Custom for Oracle (managed + cho tùy chỉnh). A: RDS for Oracle thường không cho quyền đó, phải thay tính năng. C: EC2 tự quản backup/patch. D: viết lại app sang PostgreSQL tốn kém, không nhanh."
  },
  {
   "id": 450,
@@ -7442,7 +7593,8 @@
    "F"
   ],
   "explanation": "B. Use AWS Budgets to create a budget. Set the budget amount under the Billing dashboards of the required AWS accounts.\nD. Create an IAM role for AWS Budgets to run budget actions with the required permissions.\nF. Add an alert to notify the company when each account meets its budget threshold. Add a budget action that selects the IAM identity created with the appropriate service control policy (SCP) to prevent provisioning of additional resources.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "B: tạo budget trong AWS Budgets (Billing) cho từng account. D: Budgets cần IAM role (không phải IAM user) để chạy budget action. F: budget action gắn SCP để chặn tạo thêm tài nguyên khi vượt ngưỡng + gửi cảnh báo. A: Cost and Usage Reports không phải nơi đặt budget. C: dịch vụ dùng role, không dùng user. E: Config rule chỉ đánh giá, không chặn."
  },
  {
   "id": 456,
@@ -7540,7 +7692,8 @@
    "B"
   ],
   "explanation": "B. Use AWS Global Accelerator to create an accelerator. Create a Network Load Balancer (NLB) behind an accelerator endpoint that uses Global Accelerator integration and listening on the TCP and UDP ports. Update the Auto Scaling group to register instances on the NLB.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "TCP + UDP, user toàn cầu, latency thấp nhất → Global Accelerator (hỗ trợ TCP/UDP, đi mạng AWS) + NLB (layer 4 hỗ trợ TCP/UDP). A/D: ALB chỉ HTTP/HTTPS. C/D: CloudFront không hỗ trợ UDP."
  },
  {
   "id": 462,
@@ -7620,7 +7773,8 @@
    "A"
   ],
   "explanation": "A. Configure the application to use Multi-AZ EC2 Auto Scaling and create an Application Load Balancer",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "App stateless, EC2 chỉ 1 AZ → ASG trải nhiều AZ + ALB phân tải → HA. B: snapshot sang Region khác là backup, không phải HA. C: latency routing không thêm AZ. D: thiếu ASG nhiều AZ cho EC2."
  },
  {
   "id": 467,
@@ -7636,7 +7790,8 @@
    "B"
   ],
   "explanation": "B. Turn on discount sharing from the Billing Preferences section of the account console in the company's Organizations management account.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chia sẻ phần Savings Plan dư cho account khác trong Organization → bật discount sharing (chia sẻ RI/Savings Plans) ở Billing Preferences của management account. A: tùy chọn này chỉ bật được ở management account. C: dời workload là thay đổi lớn. D: Savings Plan không bán lại được (chỉ RI mới bán được trên Marketplace)."
  },
  {
   "id": 468,
@@ -7652,7 +7807,8 @@
    "B"
   ],
   "explanation": "B. Design a REST API by using Amazon API Gateway. Host the application in Amazon Elastic Container Service (Amazon ECS) in a private subnet. Create a private VPC link for API Gateway to access Amazon ECS.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Yêu cầu REST API → API Gateway REST API; backend container ở private subnet → VPC link (private) tới ECS (qua NLB). A/C: WebSocket không phải REST. D: API Gateway không gắn được security group để vào private subnet."
  },
  {
   "id": 469,
@@ -7764,7 +7920,8 @@
    "C"
   ],
   "explanation": "C. Amazon Elastic File System (Amazon EFS) with the Standard storage class",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Shared file system cho ECS, mount target ở mỗi AZ, AWS Backup copy sang Region khác (RPO 8h) → EFS Standard. A/B/D: FSx dùng cho Windows/ONTAP/ZFS; ECS (Linux) dùng EFS là tích hợp chuẩn, có mount target mỗi AZ."
  },
  {
   "id": 476,
@@ -7910,7 +8067,8 @@
    "A"
   ],
   "explanation": "A. Store the video archives in Amazon S3 Glacier and use Expedited retrievals.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Hiếm khi cần, rẻ nhất, cần lấy trong tối đa 5 phút → Glacier + Expedited retrieval (1–5 phút). B: Standard retrieval mất 3–5 giờ. C/D: Standard-IA/One Zone-IA lấy ngay nhưng phí lưu trữ cao hơn Glacier."
  },
  {
   "id": 486,
@@ -7990,7 +8148,8 @@
    "B"
   ],
   "explanation": "B. Export the data directly from DynamoDB to Amazon S3 with continuous backups. Turn on point-in-time recovery for the table.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Backup liên tục ra S3, ít code, không tốn RCU → bật point-in-time recovery + export to S3 (dùng dữ liệu PITR, không đọc bảng nên không tốn RCU). A: EMR/Hive đọc bảng → tốn RCU, phải quản cluster. C/D: tự viết Lambda; D còn đọc bảng tốn RCU."
  },
  {
   "id": 491,
@@ -8059,7 +8218,9 @@
    "D"
   ],
   "explanation": "D. The request to terminate the EC2 instance does not originate from the CIDR blocks 192.0.2.0/24 or 203.0.113.0/24.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Policy chỉ Allow ec2:TerminateInstances khi request đến từ 192.0.2.0/24 hoặc 203.0.113.0/24. Request từ IP khác → không có Allow nào khớp → mặc định Deny → 403 → D. A: EC2 không có resource-based policy. B: identity-based policy gắn vào role thì không cần Principal. C: action đã đúng là TerminateInstances.",
+  "note": "Hình policy bị mất khi trích PDF. Nội dung policy: Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = [192.0.2.0/24, 203.0.113.0/24]."
  },
  {
   "id": 495,
@@ -8093,7 +8254,8 @@
    "D"
   ],
   "explanation": "B. Deploy an AWS Storage Gateway file gateway to replace NFS storage.\nD. Deploy an AWS Storage Gateway volume gateway to replace the block storage.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Không đủ dung lượng, có cả block và NFS, cần cache cục bộ, không đổi kiến trúc → File Gateway thay NFS (B) + Volume Gateway (cached) thay block storage (D). A: mount S3 trực tiếp không phải giải pháp chuẩn. C: Snowball Edge dùng cho chuyển dữ liệu/edge. E: EFS mount từ on-prem không có cache cục bộ, latency cao."
  },
  {
   "id": 497,
@@ -8109,7 +8271,8 @@
    "C"
   ],
   "explanation": "C. Provision a VPC gateway endpoint. Configure the route table for the private subnet to use the gateway endpoint as the route for all S3 traffic.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Truy cập S3 cùng Region qua NAT gateway → tốn phí xử lý dữ liệu NAT. Gateway endpoint cho S3 miễn phí, route qua route table của private subnet → rẻ nhất. A/B: NAT instance vẫn phải trả tiền EC2 + tự quản; B còn đặt sai subnet. D: thêm NAT gateway thì tốn thêm."
  },
  {
   "id": 498,
@@ -8141,7 +8304,8 @@
    "D"
   ],
   "explanation": "D. Contact an AWS Direct Connect Partner to order a 200 Mbps hosted connection for an existing AWS account.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Dùng chưa tới 10% của 1 Gbps → hạ xuống 200 Mbps. Băng thông dưới 1 Gbps chỉ có dạng hosted connection qua Direct Connect Partner. B: console không tạo được dedicated 200 Mbps. A/C: chia sẻ với account khác không đảm bảo bảo mật và vẫn trả cho 1 Gbps."
  },
  {
   "id": 500,
@@ -8159,7 +8323,8 @@
    "D"
   ],
   "explanation": "A. Deploy AWS DataSync agents on premises. Schedule DataSync tasks to transfer the data to the FSx for Windows File Server file system.\nD. Order an AWS Snowcone device. Connect the device to the on-premises network. Launch AWS DataSync agents on the device. Schedule DataSync tasks to transfer the data to the FSx for Windows File Server file system.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Giữ nguyên quyền file (NTFS ACL) khi chuyển vào FSx for Windows → DataSync (giữ metadata/quyền). A: agent DataSync on-prem chuyển qua mạng. D: Snowcone có sẵn DataSync agent, chuyển offline rồi DataSync vào FSx. B/C/E: đi qua S3 trung gian bằng CLI/ổ cứng → mất thông tin quyền."
  },
  {
   "id": 501,
@@ -8209,7 +8374,8 @@
    "A"
   ],
   "explanation": "A. Ensure that the customers create an IAM role in their account with read-only EC2 and CloudWatch permissions and a trust policy to the company’s account.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Truy cập account khách an toàn nhất → khách tạo IAM role (read-only) với trust policy tin tưởng account công ty; công ty assume role nhận credential tạm (nên kèm external ID). B: tự xây token vending machine, phức tạp. C/D: lưu access key/password lâu dài là kém an toàn."
  },
  {
   "id": 504,
@@ -8307,7 +8473,8 @@
    "B"
   ],
   "explanation": "B. Modify the network ACL for the web tier subnets. Add an inbound deny rule for the IP addresses that are consuming resources.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Chặn gấp vài IP gây quá tải → NACL của subnet web tier (ALB) với rule deny inbound. A/C: security group không có rule deny. D: chặn ở tầng app thì traffic vẫn đã tới ALB/web tier."
  },
  {
   "id": 510,
@@ -8503,7 +8670,8 @@
    "C"
   ],
   "explanation": "C. In every business account, create an IAM role named BU_ROLE with a policy that gives the role access to the DynamoDB table and a trust policy to trust a specific role in the inventory application account. In the inventory account, create a role named APP_ROLE that allows access to the STS AssumeRole API operation. Configure the application to use APP_ROLE and assume the crossaccount role BU_ROLE to read the DynamoDB table.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Đọc DynamoDB ở nhiều account, an toàn nhất → cross-account IAM role: mỗi account có BU_ROLE tin tưởng APP_ROLE, app assume role để lấy credential tạm. A: DynamoDB không xác thực bằng secret của Secrets Manager. B: access key lâu dài, rotate thủ công. D: DynamoDB không xác thực bằng chứng chỉ ACM."
  },
  {
   "id": 522,
@@ -8715,10 +8883,11 @@
   },
   "choose": 1,
   "answer": [
-   "B"
+   "C"
   ],
-  "explanation": "B. Transition objects to the S3 Standard-Infrequent Access (S3 Standard-IA) storage class 30 days after creation. Move all objects to the S3 Glacier Flexible Retrieval storage class after 90 days. Write an expiration action that directs Amazon S3 to delete objects after 90 days.",
-  "confident": true
+  "explanation": "30 ngày đầu phân tích thường xuyên → để S3 Standard. 60 ngày tiếp chỉ để backup, hiếm khi đọc → Glacier Flexible Retrieval (rẻ hơn Standard-IA nhiều). Xóa ở ngày 90. Glacier tính phí tối thiểu 90 ngày, nên object xóa sớm vẫn bị tính thêm 30 ngày, nhưng tổng vẫn rẻ hơn Standard-IA. B (đáp án của file nguồn): dùng Standard-IA cho 60 ngày backup → đắt hơn, còn bước \"chuyển Glacier sau 90 ngày\" là thừa vì object bị xóa đúng ngày 90. A: Standard → Standard không tiết kiệm gì. D: One Zone-IA kém bền, và cũng có bước Glacier thừa.",
+  "confident": true,
+  "manual": true
  },
  {
   "id": 535,
@@ -9181,7 +9350,8 @@
    "B"
   ],
   "explanation": "A. Create a route table entry for the endpoint.\nB. Create a gateway endpoint for DynamoDB.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Gọi DynamoDB không qua internet → gateway endpoint cho DynamoDB (B) + thêm route trong route table trỏ tới endpoint (A). C/D/E: thuộc về interface endpoint (ENI, security group), không áp cho gateway endpoint; C còn sai dịch vụ (EC2)."
  },
  {
   "id": 563,
@@ -9326,7 +9496,8 @@
    "A"
   ],
   "explanation": "A. Use a local machine to create a certificate that is signed by the third-party CImport the certificate into AWS Certificate Manager (ACM). Create an HTTP API in Amazon API Gateway with a custom domain. Configure the custom domain to use the certificate.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Yêu cầu TLS 1.3 + chứng chỉ do CA bên thứ 3 ký → tạo CSR, cho CA đó ký, rồi import vào ACM; HTTP API của API Gateway với custom domain hỗ trợ TLS 1.3. B/D: ACM chỉ cấp chứng chỉ do Amazon ký, không \"tạo chứng chỉ do CA bên thứ 3 ký\". C/D: Lambda function URL không gắn được custom domain/chứng chỉ riêng."
  },
  {
   "id": 572,
@@ -9567,7 +9738,8 @@
    "B"
   ],
   "explanation": "B. Invite the R&D AWS account to be part of the new organization after the R&D AWS account has left the prior organization.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Một account chỉ thuộc 1 Organization tại một thời điểm → R&D account rời organization cũ trước, rồi nhận lời mời vào organization mới. A/D: không thể thuộc 2 organization. C: tạo account mới rồi migrate tài nguyên là thừa."
  },
  {
   "id": 587,
@@ -10269,7 +10441,8 @@
    "D"
   ],
   "explanation": "D. Use Amazon RDS Blue/Green Deployments to deploy and test production changes.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Nâng cấp version, test trước, không mất dữ liệu, ít vận hành → RDS Blue/Green Deployments: tạo môi trường green (version mới) đồng bộ với production, test xong switchover trong khoảng 1 phút. A: nâng cấp thẳng production, không test trước. B/C: backup/restore hoặc DMS tốn công hơn."
  },
  {
   "id": 630,
@@ -10381,7 +10554,8 @@
    "C"
   ],
   "explanation": "C. Create an SNS subscription that sends the event to Amazon Simple Queue Service (Amazon SQS). Configure the SOS queue to trigger a Lambda function.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Xử lý event S3 có scale và không mất event → SNS fan-out vào SQS, SQS trigger Lambda (đệm khi tải tăng, retry khi lỗi). A/B: chèn ECS/EKS là thừa. D: AWS SMS là dịch vụ migrate server, không liên quan."
  },
  {
   "id": 637,
@@ -10450,7 +10624,8 @@
    "E"
   ],
   "explanation": "B. Grant the decrypt permission for the Lambda IAM role in the KMS key's policy\nE. Create a new IAM role with the kms:decrypt permission and attach the execution role to the Lambda function.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Lambda giải mã file bằng KMS cần 2 phía cho phép: key policy của KMS key cấp quyền decrypt cho IAM role của Lambda (B), và execution role của Lambda có kms:Decrypt (E). A/C: resource policy của Lambda quy định ai được gọi Lambda, không cấp quyền cho Lambda gọi KMS. D: không gắn policy trực tiếp vào function, phải qua role."
  },
  {
   "id": 641,
@@ -10532,7 +10707,8 @@
    "B"
   ],
   "explanation": "B. Use an AWS Key Management Service (AWS KMS) external key store backed by an external key manager.",
-  "confident": true
+  "confident": true,
+  "explanation_vi": "Key phải nằm ngoài AWS, hỗ trợ key manager của nhiều hãng, ít vận hành → KMS External Key Store (XKS) trỏ tới key manager bên ngoài. A/D: CloudHSM vẫn nằm trong AWS. C: key store mặc định của KMS lưu key trong AWS."
  },
  {
   "id": 646,

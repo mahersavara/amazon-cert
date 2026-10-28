@@ -109,7 +109,7 @@
   "answer": [
    "C"
   ],
-  "explanation": "Đề gốc kèm ảnh nội dung Policy1/Policy2 (bị mất khi trích PDF). Theo đáp án phổ biến: Policy1 cho phép rộng (iam/ec2/ds/logs), Policy2 Deny tường minh các thao tác xóa IAM user, directory và CloudWatch Logs. Explicit Deny luôn thắng Allow → chỉ còn xóa EC2 instance. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny."
+  "explanation": "Policy1 chỉ cho xem (Get/List/Describe) với IAM và CloudWatch Logs, nhưng cho toàn quyền ec2:* và ds:*. Policy2 Deny tường minh ds:Delete*. Explicit Deny luôn thắng Allow → không xóa được directory (B). A: IAM chỉ có Get/List, không có DeleteUser. D: Logs chỉ có Get/Describe. Còn lại xóa EC2 instance (ec2:*) → C. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny."
  },
  "257": {
   "answer": [
@@ -421,5 +421,25 @@
    "C"
   ],
   "explanation": "Ít thay đổi app + tăng resiliency: web tier lên EC2 Auto Scaling sau ALB (nhiều AZ), DB MySQL lên RDS Multi-AZ (cùng engine, failover tự động). B DB trên ASG sau NLB không đồng bộ dữ liệu giữa các node. D Lambda và E DynamoDB đều phải viết lại code."
+ },
+ "110": {
+  "answer": [
+   "C",
+   "D"
+  ],
+  "explanation": "Upload chậm vì ảnh phải đi qua web server rồi mới resize. C: trình duyệt upload thẳng lên S3 bằng presigned URL → web server không còn gánh việc nhận file. D: S3 Event Notification gọi Lambda resize sau khi upload → tách rời (decouple), serverless. B (đáp án của file nguồn): web server vẫn nhận toàn bộ ảnh rồi mới đẩy lên S3 → vẫn chậm, chưa giảm coupling; đa số tài liệu chọn C+D. A: Glacier là lưu trữ lạnh. E: resize theo lịch → không xử lý ngay."
+ },
+ "156": {
+  "answer": [
+   "A",
+   "E"
+  ],
+  "explanation": "Gom dữ liệu batch + stream vào một chỗ, stage ở S3, ít vận hành. E: Lake Formation blueprints + Glue crawler/ETL tự đưa dữ liệu vào S3 dạng Parquet (data lake). A: Athena query một lần trực tiếp trên S3, QuickSight làm dashboard KPI. C (đáp án của file nguồn): tự viết Lambda chuyển từng bản ghi sang Redshift → nhiều code, không stage vào S3 như đề yêu cầu. B: Kinesis Data Analytics cho dữ liệu streaming, không dùng cho query một lần. D: nhiều cụm OpenSearch → tốn vận hành."
+ },
+ "534": {
+  "answer": [
+   "C"
+  ],
+  "explanation": "30 ngày đầu phân tích thường xuyên → để S3 Standard. 60 ngày tiếp chỉ để backup, hiếm khi đọc → Glacier Flexible Retrieval (rẻ hơn Standard-IA nhiều). Xóa ở ngày 90. Glacier tính phí tối thiểu 90 ngày, nên object xóa sớm vẫn bị tính thêm 30 ngày, nhưng tổng vẫn rẻ hơn Standard-IA. B (đáp án của file nguồn): dùng Standard-IA cho 60 ngày backup → đắt hơn, còn bước \"chuyển Glacier sau 90 ngày\" là thừa vì object bị xóa đúng ngày 90. A: Standard → Standard không tiết kiệm gì. D: One Zone-IA kém bền, và cũng có bước Glacier thừa."
  }
 }
