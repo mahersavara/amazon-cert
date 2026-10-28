@@ -197,7 +197,7 @@ def show_explanation(q, picked):
     elif q.get("explanation_vi"):
         print(color("\n📖 Giải thích (tiếng Việt):", "cyan", "bold"))
         print(wrap(q["explanation_vi"], "   ", "   "))
-        print(color("\n📄 Đáp án theo nguồn (tiếng Anh):", "dim", "bold"))
+        print(color("\n📄 Giải thích gốc (tiếng Anh):", "dim", "bold"))
         print(color(wrap(q["explanation"], "   ", "   "), "dim"))
     elif q["explanation"]:
         print(color("\n📖 Giải thích chi tiết (nguồn, tiếng Anh):", "cyan", "bold"))

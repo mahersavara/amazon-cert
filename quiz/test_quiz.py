@@ -67,6 +67,10 @@ class DataTest(unittest.TestCase):
                 self.assertTrue(any(re.search(rf"\b{l}\b", text) for l in wrong),
                                 "explains no wrong option")
 
+    def test_every_question_has_vietnamese_explanation(self):
+        missing = [q["id"] for q in QUESTIONS if not (q.get("manual") or q.get("explanation_vi"))]
+        self.assertEqual(missing, [])
+
     def test_lost_images_described(self):
         for qid in ("96", "253", "423", "429", "494"):
             with self.subTest(id=qid):

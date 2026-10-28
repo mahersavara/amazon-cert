@@ -31,8 +31,8 @@ Progress is saved to `quiz/progress.json` (gitignored).
 | `quiz/quiz.py` | The app (menu, modes, progress) |
 | `quiz/aws_glossary.py` | Vietnamese notes per AWS service + requirement keyword hints |
 | `quiz/build_data.py` | Builds `questions.json` from the source PDF + solution txt |
-| `quiz/answer_overrides.json` | 70 hand-verified answers + Vietnamese explanations |
-| `quiz/explanations_vi.json` | Vietnamese explanations for 168 questions whose source text only restates the answer |
+| `quiz/answer_overrides.json` | 76 hand-verified answers + Vietnamese explanations; can also replace a stem or options the PDF got wrong |
+| `quiz/explanations_vi.json` | Vietnamese explanations for the other 607 questions (source answer kept) |
 | `quiz/stem_notes.json` | Text descriptions of policy images lost in extraction (#96, #253, #423, #429, #494), shown with the question |
 | `quiz/test_quiz.py` | Data integrity, glossary and piped-input CLI tests |
 | `quiz/questions.json` | Generated question bank (683 questions), committed |
@@ -65,16 +65,26 @@ Progress is saved to `quiz/progress.json` (gitignored).
 
 Goal: make every question understandable for a Vietnamese learner, and verify answers along the way.
 
-- Found 171 questions whose source "explanation" only restates the answer in English. Re-checked each
-  answer against the stem and wrote a Vietnamese explanation: why the keyed answer fits the
-  requirement and why each wrong option fails. 238/683 questions now have a Vietnamese explanation
-  (168 new + 70 overrides); the rest keep the source's English reasoning.
-- Corrected three source answers via `answer_overrides.json`, each with a Vietnamese rationale:
+- Every question (683/683) now has a Vietnamese explanation: why the keyed answer fits the
+  requirement and why each wrong option fails. Each answer was re-checked against the stem while
+  writing it. 171 source explanations only restated the answer; the rest had English reasoning,
+  which is still shown (dimmed) under the Vietnamese text.
+- Corrected nine questions via `answer_overrides.json`, each with a Vietnamese rationale:
   - #110: B+D → C+D. A presigned URL upload takes the slow image upload off the web server.
+  - #125: the PDF prints two options labelled "D"; the second is now E, and the answer is A+E
+    (the source key A+B put the ALB in private subnets).
+  - #145: A → D. Adding one fixed instance does not "scale seamlessly"; Aurora + Auto Scaling does.
   - #156: A+C → A+E. Lake Formation + Glue stage data in S3; custom Lambda to Redshift is high overhead.
+  - #231: the parser read "VPC A"/"VPC B" in the stem as options A/B; stem and options are rebuilt
+    from the PDF, and the answer is B (VPC peering).
+  - #328: B → D. An SQS queue guarantees every request is processed during a sudden spike.
   - #534: B → C. Glacier Flexible Retrieval is cheaper than Standard-IA for the 60-day backup window.
-- Two answers stay as the source has them but the explanation notes the debate: #141 (Route 53
-  latency routing vs CloudFront) and #275 (target tracking vs scheduled action).
+  - #536: C → D. A Multi-AZ DB cluster's readable standbys cost less than Multi-AZ + 2 read replicas.
+  - #667: A → C. Only S3 interface endpoints are reachable from on premises over Direct Connect.
+- Answers that stay as the source has them, with the debate noted in the explanation: #141, #268,
+  #275, #511, #523, #622, #677.
+- Four stems (#232, #460, #467, #473) lack the final question sentence in the PDF itself; the
+  options still make the question clear, so they are left as is.
 - Found two more lost policy images (#96, #494). Their stems now show the policy text before the
   learner answers, instead of only in the explanation.
 - Requirement hints ("🎯 Phân tích đề"): added 15 keyword rules (operational efficiency, minimal code
@@ -87,8 +97,8 @@ Goal: make every question understandable for a Vietnamese learner, and verify an
 Results:
 
 - `python quiz/build_data.py` → `questions: 683 | with answer: 683 | low-confidence: 0 |
-  vietnamese explanation: 238`.
-- `python quiz/test_quiz.py` → 15 tests OK, stable over repeated runs. They check that every answer
+  vietnamese explanation: 683`.
+- `python quiz/test_quiz.py` → 16 tests OK, stable over repeated runs. They check that every answer
   is a valid option with the right count, that overrides/notes/Vietnamese text reach
   `questions.json`, that hints and service notes match correctly, and that piped CLI runs complete
   without a traceback.

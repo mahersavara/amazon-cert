@@ -160,6 +160,10 @@ def main():
             ov = overrides[str(num)]
             item.update(answer=sorted(ov["answer"]), explanation=ov["explanation"],
                         confident=True, manual=True)
+            # Fixes stems/options that the PDF mislabels or the parser splits wrongly
+            for key in ("question", "options"):
+                if key in ov:
+                    item[key] = ov[key]
         # Vietnamese explanation for a source answer whose English text gives no reasoning
         elif str(num) in vi:
             item["explanation_vi"] = vi[str(num)]
