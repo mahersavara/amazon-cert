@@ -13,7 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from quiz import load_questions, requirement_hints, services_in, terms_in  # noqa: E402
+from quiz import (load_questions, option_differences, requirement_hints, services_in,  # noqa: E402
+                  terms_in)
 
 WEB = ROOT.parent / "web"
 
@@ -37,6 +38,7 @@ def build():
     out = []
     for q in load_questions():
         text = q["question"] + "\n" + "\n".join(q["options"].values())
+        common, diff = option_differences(q)
         item = {
             "id": q["id"], "q": q["question"], "o": q["options"], "c": q["choose"],
             "a": q["answer"], "e": q["explanation"],
@@ -45,6 +47,9 @@ def build():
             "s": [services.add(list(s)) for s in services_in(q["question"])],
             "os": {k: [services.add(list(s)) for s in services_in(v)]
                    for k, v in q["options"].items()},
+            # "So sánh đáp án": names every option shares, then notes that set each option apart
+            "hc": common,
+            "hd": {k: [services.add(list(n)) for n in notes] for k, notes in diff.items()},
         }
         for src, dst in (("explanation_vi", "evi"), ("note", "note"), ("stem_vi", "sv"),
                          ("options_vi", "ov"), ("manual", "m")):

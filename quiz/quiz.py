@@ -150,14 +150,43 @@ def show_question(q, pos, total, progress, hints=True):
     print()
 
 
+def option_differences(q):
+    """Split glossary notes into ones every option shares and ones that set an option apart.
+
+    Notes shared by all options cannot tell them apart, so they are listed once by name.
+    Plain vocabulary (TERMS) is kept only when at most half the options use it.
+    """
+    services = {k: dict(services_in(v)) for k, v in q["options"].items()}
+    terms = {k: dict(terms_in(v)) for k, v in q["options"].items()}
+    every = set.intersection(*(set(n) for n in services.values()))
+    half = len(q["options"]) // 2
+    used = {}
+    for notes in terms.values():
+        for t in notes:
+            used[t] = used.get(t, 0) + 1
+    common = [n for n in services[next(iter(services))] if n in every]
+    diff = {}
+    for k in q["options"]:
+        notes = [(n, note) for n, note in services[k].items() if n not in every]
+        names = {n for n, _ in notes} | set(services[k])
+        notes += [(t, m) for t, m in terms[k].items() if used[t] <= half and t not in names]
+        diff[k] = notes
+    return common, diff
+
+
 def show_service_hints(q):
-    print(color("🔎 Gợi ý dịch vụ trong các đáp án:", "cyan", "bold"))
-    for letter, text in q["options"].items():
-        svc = services_in(text)
-        if svc:
-            print(color(f"  {letter}.", "bold", "yellow"))
-            for name, note in svc:
-                print(wrap(f"{name}: {note}", "     • ", "       "))
+    print(color("🔎 Khác biệt giữa các đáp án:", "cyan", "bold"))
+    for h in requirement_hints(q["question"]):
+        print(wrap(h, color("   🎯 ", "magenta"), "      "))
+    common, diff = option_differences(q)
+    if common:
+        print(wrap("Có ở mọi đáp án (không giúp phân biệt): " + ", ".join(common), "   ", "   "))
+    for letter, notes in diff.items():
+        print(color(f"  {letter}.", "bold", "yellow"))
+        if not notes:
+            print(color("     (không có dịch vụ hay thuật ngữ riêng, so sánh trực tiếp nội dung đáp án)", "dim"))
+        for name, note in notes:
+            print(wrap(f"{name}: {note}", "     • ", "       "))
     print()
 
 
@@ -252,7 +281,7 @@ def read_answer(q, allow_hint=True, redraw=None):
     """Return list of letters, or 'skip' / 'quit'. redraw() repaints the bare question for 'r'."""
     valid = list(q["options"])
     k = q["choose"]
-    extra = ", h=gợi ý dịch vụ" if allow_hint else ""
+    extra = ", h=so sánh đáp án" if allow_hint else ""
     extra += ", r=làm mới" if redraw else ""
     while True:
         raw = ask(f"Chọn ({valid[0]}-{valid[-1]}{', nhập ' + str(k) + ' chữ' if k > 1 else ''}"

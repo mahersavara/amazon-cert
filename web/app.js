@@ -96,7 +96,7 @@ function home() {
     </div>
     <p class="small" id="offline">${offlineText()}</p>
     <p class="muted small">Phím tắt trên máy tính: A–F chọn, Enter trả lời / câu tiếp, V dịch đề, K từ khóa,
-    H gợi ý dịch vụ, R làm mới, S bỏ qua, Q về menu.</p>`);
+    H so sánh đáp án, R làm mới, S bỏ qua, Q về menu.</p>`);
   app.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => startMode(b.dataset.go)));
 }
 
@@ -184,7 +184,7 @@ function showQuestion() {
     <div class="toolbar">
       <button data-act="v">🇻🇳 Dịch đề<span class="kbd">V</span></button>
       <button data-act="k">🔤 Từ khóa<span class="kbd">K</span></button>
-      ${exam ? "" : '<button data-act="h">🔎 Gợi ý dịch vụ<span class="kbd">H</span></button>'}
+      ${exam ? "" : '<button data-act="h">🔎 So sánh đáp án<span class="kbd">H</span></button>'}
       <button data-act="r">↺ Làm mới<span class="kbd">R</span></button>
       <button data-act="s">Bỏ qua<span class="kbd">S</span></button>
       ${exam ? '<button data-act="submit">Nộp bài</button>' : ""}
@@ -235,9 +235,18 @@ function panelHtml(kind, q) {
       `<li><b>${esc(DATA.services[i][0])}</b>: ${esc(DATA.services[i][1])}</li>`).join("")}</ul>` : "";
     return `<div class="card panel" data-panel="k">${terms}${svc}</div>`;
   }
-  const rows = Object.keys(q.o).filter((k) => q.os[k].length).map((k) =>
-    `<h3>${k}.</h3><ul>${q.os[k].map((i) => `<li><b>${esc(DATA.services[i][0])}</b>: ${esc(DATA.services[i][1])}</li>`).join("")}</ul>`);
-  return `<div class="card panel hint" data-panel="h"><h3>🔎 Gợi ý dịch vụ trong các đáp án</h3>${rows.join("") || "Không có."}</div>`;
+  // "So sánh đáp án": the requirement, what every option shares, then what sets each option apart
+  const need = q.h.length ? `<ul>${q.h.map((i) => `<li>🎯 ${esc(DATA.hints[i])}</li>`).join("")}</ul>` : "";
+  const common = q.hc.length
+    ? `<p class="small muted">Có ở mọi đáp án, không giúp phân biệt: ${q.hc.map(esc).join(", ")}</p>` : "";
+  const rows = Object.keys(q.o).map((k) => {
+    const notes = q.hd[k].length
+      ? `<ul>${q.hd[k].map((i) => `<li><b>${esc(DATA.services[i][0])}</b>: ${esc(DATA.services[i][1])}</li>`).join("")}</ul>`
+      : `<p class="small muted">Không có dịch vụ hay thuật ngữ riêng, so sánh trực tiếp nội dung đáp án.</p>`;
+    const text = q.ov ? q.ov[k] || q.o[k] : q.o[k];
+    return `<div class="diff"><h3>${k}. <span class="small muted">${esc(text)}</span></h3>${notes}</div>`;
+  });
+  return `<div class="card panel hint" data-panel="h"><h3>🔎 So sánh đáp án</h3>${need}${common}${rows.join("")}</div>`;
 }
 
 function act(a) {
