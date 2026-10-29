@@ -12,7 +12,8 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 from aws_glossary import KEYWORDS, SERVICES, TERMS  # noqa: E402
-from quiz import option_differences, requirement_hints, services_in, terms_in  # noqa: E402
+from quiz import (option_differences, requirement_hints, services_in, suggested_times,  # noqa: E402
+                  terms_in)
 
 
 def load(name):
@@ -121,6 +122,18 @@ class GlossaryTest(unittest.TestCase):
         for k in "ABCD":
             self.assertNotIn("S3", names[k])
             self.assertNotIn("principal", names[k])
+
+    def test_suggested_times_match_exam_pace(self):
+        times = [suggested_times(q) for q in QUESTIONS]
+        mean_answer = sum(t[0] for t in times) / len(times)
+        # 65 questions at this pace should take about the real exam's 130 minutes
+        self.assertTrue(110 <= mean_answer <= 130, mean_answer)
+        for answer, right, wrong in times:
+            self.assertTrue(60 <= answer <= 240 and answer % 15 == 0)
+            self.assertTrue(30 <= right <= 90 and 60 <= wrong <= 150 and right < wrong)
+        short = min(QUESTIONS, key=lambda q: len(q["question"]))
+        long = max(QUESTIONS, key=lambda q: len(q["question"]))
+        self.assertLess(suggested_times(short)[0], suggested_times(long)[0])
 
     def test_hint_coverage(self):
         without = [q["id"] for q in QUESTIONS if not requirement_hints(q["question"])]

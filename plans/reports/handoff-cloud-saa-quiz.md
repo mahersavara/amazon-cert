@@ -219,3 +219,38 @@ Found and fixed:
 
 Checked: the end-to-end flow, the offline flow, resume, and light/dark screenshots on iPhone SE;
 no console errors. Tests: 23 OK (the export test also checks highlight spans and `xd`).
+
+## Follow-up: per-question timer (practice)
+
+The user asked for a timer on each question for pressure, with the times left to us to calibrate.
+
+- `suggested_times(q)` in `quiz.py` gives (answer, review if right, review if wrong) seconds,
+  rounded to 15 s; `export_web.py` stores them as `tm`.
+  - **Answer:** 120 s × words / 155, +15 % for multi-answer, clamped to 60–240 s. 155 words
+    is the bank's mean length of stem + options, so the mean is ~122 s. 65 such questions
+    add up to ~132 min, close to the real exam's 130 min / 65 questions.
+  - **Review:** 30 + 0.6 s per word of the Vietnamese explanation (30–90 s) after a right
+    answer. After a wrong one it is 60 + 1 s per word (60–150 s); there is a mistake to
+    understand.
+- **Home screen:** "⏱ Bấm giờ mỗi câu" has three modes: Tắt / Thoải mái (×1.5 answer time,
+  default, ~3 min per question) / Nhịp thi thật (×1).
+- **Question screen:** a countdown and a thin bar under the top line; both turn red in the last
+  30 s. At zero the current selection is submitted. Nothing or too few picked counts as wrong
+  ("⏰ Hết giờ").
+- **Explanation screen:** "Trả lời trong 1:42 · thời gian gợi ý 2:15". "Câu tiếp" counts down the
+  review time and then moves on; "⏸ Giữ" pauses it. After a timeout the screen waits for the
+  learner, so a phone left idle loses one question instead of failing question after question.
+- **Time spent:** saved per question; Thống kê shows the average time per question next to the
+  exam's ~2:00.
+- **Exam mode:** keeps its single 130-minute timer and has no per-question timer.
+
+Checked with Playwright's fake clock (iPhone SE):
+- the countdown runs down
+- answering shows the timing line
+- pause holds the review; resuming moves on automatically
+- a timeout counts as wrong and then waits
+- relaxed is 1.5× exam pace and Tắt shows no timer
+- exam mode is unchanged
+- the e2e, offline and resume flows still pass; no console errors
+
+Tests: 24 OK (added `test_suggested_times_match_exam_pace`).

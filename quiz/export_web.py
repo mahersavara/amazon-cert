@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 from quiz import (load_questions, option_differences, requirement_hints,  # noqa: E402
-                  requirement_spans, services_in, terms_in)
+                  requirement_spans, services_in, suggested_times, terms_in)
 
 WEB = ROOT.parent / "web"
 
@@ -39,11 +39,14 @@ def build():
     for q in load_questions():
         text = q["question"] + "\n" + "\n".join(q["options"].values())
         common, diff = option_differences(q)
+        answer_s, right_s, wrong_s = suggested_times(q)
         item = {
             "id": q["id"], "q": q["question"], "o": q["options"], "c": q["choose"],
             "a": q["answer"], "e": q["explanation"],
             "h": [hints.add(h) for h in requirement_hints(q["question"])],
             "hl": requirement_spans(q["question"]),
+            # Suggested seconds: answering, then reviewing after a right / wrong answer
+            "tm": [answer_s, right_s, wrong_s],
             "t": [terms.add(list(t)) for t in terms_in(text)],
             "s": [services.add(list(s)) for s in services_in(q["question"])],
             "os": {k: [services.add(list(s)) for s in services_in(v)]

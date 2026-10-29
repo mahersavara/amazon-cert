@@ -127,6 +127,24 @@ def requirement_hints(stem):
     return [hint for pattern, hint in KEYWORDS if re.search(pattern, stem, re.I)]
 
 
+def suggested_times(q):
+    """Return (answer, review_if_right, review_if_wrong) in seconds, rounded to 15 s.
+
+    Answer time is scaled to the exam's pace: 130 min / 65 questions = 120 s for a question of
+    the bank's mean length (155 words of stem + options), +15 % when it asks for 2-3 answers.
+    Over the whole bank it averages ~122 s, so a full exam's worth of questions adds up to about
+    the real 130 minutes. Review time grows with the Vietnamese explanation (~50 words on
+    average) and is longer after a wrong answer, when there is a mistake to understand.
+    """
+    def step(x, lo, hi):
+        return min(hi, max(lo, int(round(x / 15) * 15)))
+
+    words = len((q["question"] + " " + " ".join(q["options"].values())).split())
+    answer = step(120 * words / 155 * (1.15 if q["choose"] > 1 else 1), 60, 240)
+    notes = len((q.get("explanation_vi") or q["explanation"]).split())
+    return answer, step(30 + notes * 0.6, 30, 90), step(60 + notes, 60, 150)
+
+
 def requirement_spans(stem):
     """Return merged [start, end) spans of the requirement phrases in stem, for highlighting."""
     spans = sorted(m.span() for pattern, _ in KEYWORDS for m in re.finditer(pattern, stem, re.I)
