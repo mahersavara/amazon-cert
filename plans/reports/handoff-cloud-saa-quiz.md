@@ -177,3 +177,21 @@ Safari once, Share → Add to Home Screen).
   - The earlier end-to-end flow passes again.
 - Tests: 22 OK. The export test now also checks `sw.js`, the manifest and the icons, that the
   version placeholder is replaced, and that every precached path exists.
+
+## Follow-up: clearer option hints ("So sánh đáp án")
+
+The old service-hint panel (`h`) listed every service under every option, so a note like "S3:
+object storage" repeated four times and the options that differed only by a condition key showed
+almost nothing. `option_differences()` in `quiz.py` now drives both the CLI and the web panel:
+
+- The panel opens with the requirement hints, then names once what every option shares
+  ("Có ở mọi đáp án, không giúp phân biệt: S3").
+- Each option then lists only the services that set it apart, plus vocabulary terms used by at
+  most half the options. On the web, the option's Vietnamese text is shown above its notes.
+- 17 new glossary entries cover gaps that often separate options: `aws:PrincipalOrgPaths`,
+  `aws:PrincipalTag`, IAM user/group, execution role, resource-based policy, Traffic Mirroring, EBS
+  fast snapshot restore, SQS visibility timeout and long polling, Glue job bookmarks, SSE-C,
+  scheduled scaling, CloudFront OAI/OAC, composite alarms, Synthetics, Lambda /tmp.
+- The button and key are now "So sánh đáp án" (`h`).
+
+Tests: 23 OK (added `test_option_differences`).

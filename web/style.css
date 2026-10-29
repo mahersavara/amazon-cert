@@ -135,3 +135,6 @@ details summary { cursor: pointer; color: var(--muted); }
   main { padding: 12px 12px 120px; }
 }
 .opt:disabled { opacity: 1; cursor: default; }
+.diff { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
+.diff h3 { font-weight: 700; }
+.diff h3 .small { font-weight: 400; }

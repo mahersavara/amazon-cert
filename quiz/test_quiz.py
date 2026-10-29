@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 from aws_glossary import KEYWORDS, SERVICES, TERMS  # noqa: E402
-from quiz import requirement_hints, services_in, terms_in  # noqa: E402
+from quiz import option_differences, requirement_hints, services_in, terms_in  # noqa: E402
 
 
 def load(name):
@@ -109,6 +109,18 @@ class GlossaryTest(unittest.TestCase):
         self.assertIn("cost-effective", found)
         self.assertNotIn("block storage", [t for t, _ in terms_in("Block the attacker's IP address")])
         self.assertNotIn("elastic / elasticity", [t for t, _ in terms_in("Use Elastic Load Balancing")])
+
+    def test_option_differences(self):
+        common, diff = option_differences(BY_ID[3])
+        self.assertEqual(common, ["S3"])
+        names = {k: [n for n, _ in v] for k, v in diff.items()}
+        self.assertIn("aws:PrincipalOrgID", names["A"])
+        self.assertIn("aws:PrincipalOrgPaths", names["B"])
+        self.assertIn("aws:PrincipalTag", names["D"])
+        # Shared names and vocabulary used by most options are not repeated per option
+        for k in "ABCD":
+            self.assertNotIn("S3", names[k])
+            self.assertNotIn("principal", names[k])
 
     def test_hint_coverage(self):
         without = [q["id"] for q in QUESTIONS if not requirement_hints(q["question"])]
