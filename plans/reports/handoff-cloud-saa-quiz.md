@@ -195,3 +195,27 @@ almost nothing. `option_differences()` in `quiz.py` now drives both the CLI and 
 - The button and key are now "So sánh đáp án" (`h`).
 
 Tests: 23 OK (added `test_option_differences`).
+
+## Working agreement: self-test after each change
+
+From here on, after implementing anything in the web quiz, play it as a learner first. Use
+headless Chromium at iPhone SE and iPhone 13 sizes, light and dark, and look at the question,
+the explanation and the home screen. Fix what is hard to follow before reporting.
+
+### First self-test pass (learnability)
+
+Found and fixed:
+- Question screen: in practice mode a "🧭 Tình huống" one-line Vietnamese summary now sits
+  above the English stem. You can hide it with "Ẩn"; the choice is remembered. Requirement
+  phrases (MOST cost-effective, LEAST operational overhead…) are highlighted in the stem; the
+  spans come from `requirement_spans()` in `quiz.py`. The exam keeps the plain stem with no
+  summary or highlight.
+- Explanation screen: the Vietnamese explanation comes right after the right/wrong banner. The
+  stem folds into "Xem lại đề". Each option shows its Vietnamese text and only the AWS services
+  that set it apart (`xd`); generic vocabulary like instance/endpoint is no longer repeated.
+- Home: a progress card (seen/683, right vs wrong at last attempt) with
+  "▶ Tiếp tục từ câu #N" to resume sequential practice.
+- Slightly tighter type and padding under 400px wide.
+
+Checked: the end-to-end flow, the offline flow, resume, and light/dark screenshots on iPhone SE;
+no console errors. Tests: 23 OK (the export test also checks highlight spans and `xd`).
