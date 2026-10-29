@@ -94,6 +94,7 @@ function home() {
       <div class="menu-item"><div class="label"><b>Thống kê</b><span class="muted small">Xem tiến độ, xóa tiến độ</span></div>
         <button data-go="stats">Mở</button></div>
     </div>
+    <p class="small" id="offline">${offlineText()}</p>
     <p class="muted small">Phím tắt trên máy tính: A–F chọn, Enter trả lời / câu tiếp, V dịch đề, K từ khóa,
     H gợi ý dịch vụ, R làm mới, S bỏ qua, Q về menu.</p>`);
   app.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => startMode(b.dataset.go)));
@@ -484,6 +485,34 @@ document.addEventListener("keydown", (e) => {
   else return;
   e.preventDefault();
 });
+
+// ---------- offline ----------
+
+let offlineReady = false;
+
+function offlineText() {
+  if (!("serviceWorker" in navigator)) return "Trình duyệt này không hỗ trợ dùng offline.";
+  return offlineReady
+    ? "✅ Đã lưu đủ câu hỏi vào máy, dùng được khi không có mạng."
+    : "⏳ Đang lưu câu hỏi để dùng offline…";
+}
+
+function markOfflineReady() {
+  offlineReady = true;
+  const el = document.getElementById("offline");
+  if (el) el.textContent = offlineText();
+}
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+    .then(() => navigator.serviceWorker.ready)
+    .then(() => caches.match("data.json"))
+    .then((hit) => { if (hit) markOfflineReady(); })
+    .catch(() => { /* offline mode unavailable; the online app still works */ });
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    caches.match("data.json").then((hit) => { if (hit) markOfflineReady(); });
+  });
+}
 
 // ---------- boot ----------
 

@@ -157,3 +157,23 @@ URL: https://mahersavara.github.io/amazon-cert/ (repo is public; Pages source mu
   progress surviving a reload, keyboard keys; no console errors.
 - `python quiz/test_quiz.py` → 22 tests OK (added: the export builds a complete site with valid
   indexes).
+
+## Follow-up: offline (PWA)
+
+The web quiz is an installable PWA, so it works with no network (e.g. on iOS: open the site in
+Safari once, Share → Add to Home Screen).
+
+- `web/sw.js` precaches the whole site (page, script, styles, `data.json`, icons) on the first
+  visit and serves it cache-first. `export_web.py` swaps `__VERSION__` for a hash of the built
+  files, so each deploy installs a new cache and drops the old one.
+- `web/manifest.webmanifest` + `web/icons/` (180/192/512 PNG) + Apple meta tags make it open
+  full-screen from the home screen.
+- The home screen shows "✅ Đã lưu đủ câu hỏi vào máy…" once `data.json` is cached.
+- On iOS the home screen app keeps its own storage, separate from Safari tabs, so progress
+  made in Safari does not carry over.
+- Checked in headless Chromium (iPhone 13), with the site served under `/amazon-cert/`:
+  - Online load shows the offline-ready line.
+  - After going offline, both a reload and a new tab still open the quiz and grade an answer.
+  - The earlier end-to-end flow passes again.
+- Tests: 22 OK. The export test now also checks `sw.js`, the manifest and the icons, that the
+  version placeholder is replaced, and that every precached path exists.
