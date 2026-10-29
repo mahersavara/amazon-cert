@@ -115,6 +115,28 @@ class GlossaryTest(unittest.TestCase):
         self.assertLess(len(without), 200)
 
 
+class WebExportTest(unittest.TestCase):
+    def test_export_builds_site(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "site"
+            res = subprocess.run([sys.executable, str(ROOT / "export_web.py"), str(out)],
+                                 capture_output=True, text=True, encoding="utf-8", timeout=120)
+            self.assertEqual(res.returncode, 0, res.stderr)
+            for name in ("index.html", "app.js", "style.css", "data.json"):
+                self.assertTrue((out / name).exists(), name)
+            data = json.loads((out / "data.json").read_text(encoding="utf-8"))
+        qs = data["questions"]
+        self.assertEqual(len(qs), len(QUESTIONS))
+        for q in qs:
+            self.assertTrue(all(0 <= i < len(data["hints"]) for i in q["h"]))
+            self.assertTrue(all(0 <= i < len(data["terms"]) for i in q["t"]))
+            self.assertTrue(all(0 <= i < len(data["services"]) for ids in q["os"].values() for i in ids))
+            self.assertEqual(sorted(q["os"]), sorted(q["o"]))
+        q1 = next(q for q in qs if q["id"] == 1)
+        self.assertEqual(q1["a"], BY_ID[1]["answer"])
+        self.assertIn("ov", q1)
+
+
 class CliTest(unittest.TestCase):
     """Drive quiz.py with piped input in a temp copy so progress.json stays untouched."""
 
