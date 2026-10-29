@@ -150,6 +150,12 @@ class WebExportTest(unittest.TestCase):
             self.assertTrue(all(0 <= i < len(data["terms"]) for i in q["t"]))
             self.assertTrue(all(0 <= i < len(data["services"]) for ids in q["os"].values() for i in ids))
             self.assertEqual(sorted(q["os"]), sorted(q["o"]))
+            for start, end in q["hl"]:
+                self.assertTrue(0 <= start < end <= len(q["q"]))
+            for k, ids in q["xd"].items():
+                self.assertTrue(set(ids) <= set(q["hd"][k]))
+        q42 = next(q for q in qs if q["id"] == 42)
+        self.assertIn("MOST cost-effective", [q42["q"][a:b] for a, b in q42["hl"]])
         q1 = next(q for q in qs if q["id"] == 1)
         self.assertEqual(q1["a"], BY_ID[1]["answer"])
         self.assertIn("ov", q1)

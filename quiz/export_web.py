@@ -13,8 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from quiz import (load_questions, option_differences, requirement_hints, services_in,  # noqa: E402
-                  terms_in)
+from quiz import (load_questions, option_differences, requirement_hints,  # noqa: E402
+                  requirement_spans, services_in, terms_in)
 
 WEB = ROOT.parent / "web"
 
@@ -43,6 +43,7 @@ def build():
             "id": q["id"], "q": q["question"], "o": q["options"], "c": q["choose"],
             "a": q["answer"], "e": q["explanation"],
             "h": [hints.add(h) for h in requirement_hints(q["question"])],
+            "hl": requirement_spans(q["question"]),
             "t": [terms.add(list(t)) for t in terms_in(text)],
             "s": [services.add(list(s)) for s in services_in(q["question"])],
             "os": {k: [services.add(list(s)) for s in services_in(v)]
@@ -50,6 +51,9 @@ def build():
             # "So sánh đáp án": names every option shares, then notes that set each option apart
             "hc": common,
             "hd": {k: [services.add(list(n)) for n in notes] for k, notes in diff.items()},
+            # Explanation screen: only the AWS services that set an option apart, no vocabulary
+            "xd": {k: [services.add(list(n)) for n in notes
+                       if n[0] in dict(services_in(q["options"][k]))] for k, notes in diff.items()},
         }
         for src, dst in (("explanation_vi", "evi"), ("note", "note"), ("stem_vi", "sv"),
                          ("options_vi", "ov"), ("manual", "m")):

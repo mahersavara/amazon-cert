@@ -127,6 +127,19 @@ def requirement_hints(stem):
     return [hint for pattern, hint in KEYWORDS if re.search(pattern, stem, re.I)]
 
 
+def requirement_spans(stem):
+    """Return merged [start, end) spans of the requirement phrases in stem, for highlighting."""
+    spans = sorted(m.span() for pattern, _ in KEYWORDS for m in re.finditer(pattern, stem, re.I)
+                   if m.end() > m.start())
+    merged = []
+    for start, end in spans:
+        if merged and start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    return merged
+
+
 def show_question(q, pos, total, progress, hints=True):
     clear()
     p = progress.get(str(q["id"]))

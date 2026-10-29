@@ -29,6 +29,30 @@ function shuffle(arr) {
 }
 
 const sample = (arr, n) => shuffle(arr).slice(0, n);
+
+// Stem with the requirement phrases (MOST cost-effective, LEAST overhead...) highlighted
+function stemHtml(q) {
+  let out = "";
+  let at = 0;
+  for (const [start, end] of q.hl || []) {
+    out += esc(q.q.slice(at, start)) + `<mark>${esc(q.q.slice(start, end))}</mark>`;
+    at = end;
+  }
+  return out + esc(q.q.slice(at));
+}
+
+function getSetting(key, fallback) {
+  try {
+    const v = localStorage.getItem("saa-quiz-" + key);
+    return v === null ? fallback : v === "1";
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function setSetting(key, on) {
+  try { localStorage.setItem("saa-quiz-" + key, on ? "1" : "0"); } catch (e) { /* ignore */ }
+}
 const sameAnswer = (picked, answer) => picked.slice().sort().join("") === answer.join("");
 
 function loadProgress() {
@@ -74,6 +98,7 @@ function home() {
     <h1>Luyện thi AWS SAA-C03</h1>
     <p class="muted">Ngân hàng ${DATA.questions.length} câu, có dịch đề, dịch đáp án và giải thích tiếng Việt.
     Tiến độ lưu ngay trên trình duyệt này.</p>
+    ${progressBar()}
     <div class="menu">
       <div class="menu-item"><div class="label"><b>Luyện tuần tự</b><span class="muted small">Bắt đầu từ câu số</span></div>
         <input id="seqStart" type="number" inputmode="numeric" min="1" max="${maxId}" value="${esc(lastSeq())}">
@@ -100,6 +125,17 @@ function home() {
   app.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => startMode(b.dataset.go)));
 }
 
+function progressBar() {
+  const seen = Object.values(progress).filter((p) => p.attempts);
+  if (!seen.length) return "";
+  const right = seen.filter((p) => p.last === true).length;
+  const pct = Math.round(seen.length * 100 / DATA.questions.length);
+  return `<div class="card progress"><div class="row"><b>Tiến độ</b><span>${seen.length}/${DATA.questions.length} câu (${pct}%)</span></div>
+    <div class="bar"><span style="width:${pct}%"></span></div>
+    <div class="small muted">Đúng ở lần gần nhất: ${right} · đang sai: ${seen.length - right}</div>
+    <div class="toolbar"><button class="primary" data-go="resume">▶ Tiếp tục từ câu #${esc(lastSeq())}</button></div></div>`;
+}
+
 function lastSeq() {
   try {
     return localStorage.getItem("saa-quiz-seq") || "1";
@@ -112,7 +148,10 @@ const num = (id) => parseInt(document.getElementById(id).value, 10);
 
 function startMode(mode) {
   const qs = DATA.questions;
-  if (mode === "seq") {
+  if (mode === "resume") {
+    const start = parseInt(lastSeq(), 10) || 1;
+    practice(qs.filter((q) => q.id >= start), "tuần tự");
+  } else if (mode === "seq") {
     const start = num("seqStart") || 1;
     practice(qs.filter((q) => q.id >= start), "tuần tự");
   } else if (mode === "rand") {
@@ -175,7 +214,8 @@ function showQuestion() {
   render(`
     <div class="topbar"><span>Câu ${s.i + 1}/${s.list.length} · #${q.id} · ${statLine(q)}</span>
       ${exam ? '<span class="timer" id="timer"></span>' : `<span>${esc(s.title)}${s.done ? ` · ${s.score}/${s.done}` : ""}</span>`}</div>
-    <div class="card"><div class="stem">${esc(q.q)}</div>
+    ${!exam && q.sv ? summaryCard(q) : ""}
+    <div class="card"><div class="stem">${exam ? esc(q.q) : stemHtml(q)}</div>
       ${q.note ? `<div class="card panel note"><h3>🖼 Bổ sung phần hình bị mất</h3><div class="stem">${esc(q.note)}</div></div>` : ""}
       ${optionList(q)}
       ${q.c > 1 ? `<div class="choose">→ Chọn ${q.c} đáp án</div>` : ""}
@@ -195,7 +235,26 @@ function showQuestion() {
   app.querySelectorAll(".opt").forEach((b) => b.addEventListener("click", () => toggle(b.dataset.letter)));
   app.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => act(b.dataset.act)));
   document.getElementById("answerBtn").addEventListener("click", submitAnswer);
+  bindSummary(q);
   if (exam) startTimer();
+}
+
+// One-line Vietnamese summary of the scenario, shown above the English stem in practice
+function summaryCard(q) {
+  const on = getSetting("summary", true);
+  return `<div class="card summary"><div class="row"><b>🧭 Tình huống</b>
+    <button class="link" id="sumToggle">${on ? "Ẩn" : "Hiện"}</button></div>
+    ${on ? `<div>${esc(q.sv.tinh_huong)}</div>` : ""}</div>`;
+}
+
+function bindSummary(q) {
+  const btn = document.getElementById("sumToggle");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    setSetting("summary", !getSetting("summary", true));
+    btn.closest(".summary").outerHTML = summaryCard(q);
+    bindSummary(q);
+  });
 }
 
 function toggle(letter) {
@@ -317,15 +376,13 @@ function explanationHtml(q, picked) {
   else if (sameAnswer(picked, ans)) banner = `<div class="banner ok">✔ ĐÚNG! Đáp án: ${ans.join("")}</div>`;
   else banner = `<div class="banner bad">✘ SAI. Bạn chọn: ${picked.join("") || "(bỏ qua)"} · Đáp án đúng: ${ans.join("")}</div>`;
 
-  const noted = new Set(); // a service note is shown once, under the first option naming it
   const cls = (k) => (ans.includes(k) ? "correct" : picked.includes(k) ? "wrong" : "");
   const extra = (k) => {
     const verdict = ans.includes(k) ? "ĐÚNG" : picked.includes(k) ? "SAI (bạn chọn)" : "";
-    const notes = q.os[k].filter((i) => !noted.has(DATA.services[i][0])).map((i) => {
-      noted.add(DATA.services[i][0]);
-      return `• ${esc(DATA.services[i][0])}: ${esc(DATA.services[i][1])}`;
-    });
-    return (verdict ? `<span class="verdict">→ ${verdict}</span>` : "") +
+    // Only the notes that set this option apart (shared services are not repeated)
+    const notes = q.xd[k].map((i) => `• ${esc(DATA.services[i][0])}: ${esc(DATA.services[i][1])}`);
+    const vi = q.ov && q.ov[k] && q.ov[k] !== q.o[k] ? `<span class="vi">${esc(q.ov[k])}</span>` : "";
+    return vi + (verdict ? `<span class="verdict">→ ${verdict}</span>` : "") +
       (notes.length ? `<span class="notes">${notes.join("<br>")}</span>` : "");
   };
 
@@ -336,7 +393,9 @@ function explanationHtml(q, picked) {
       ${q.e ? `<details><summary>📄 Giải thích gốc (tiếng Anh)</summary><div class="explain muted">${esc(q.e)}</div></details>` : ""}</div>`;
   } else if (q.e) explain = `<div class="card"><h2>📖 Giải thích (tiếng Anh)</h2><div class="explain">${esc(q.e)}</div></div>`;
 
-  return `${banner}<div class="card"><div class="stem">${esc(q.q)}</div>${optionList(q, cls, extra)}</div>${explain}`;
+  // Explanation first (the learner just read the stem); the stem stays one tap away
+  return `${banner}${explain}<div class="card"><details><summary>Xem lại đề</summary>
+    <div class="stem">${stemHtml(q)}</div></details>${optionList(q, cls, extra)}</div>`;
 }
 
 function showExplanation(q, picked) {
