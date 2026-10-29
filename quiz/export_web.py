@@ -4,6 +4,7 @@ Run: python quiz/export_web.py [out_dir]   (default: _site at the repo root)
 Copies web/ into out_dir and writes data.json with the glossary matches
 precomputed here, so the browser never has to port the Python regexes.
 """
+import hashlib
 import json
 import shutil
 import sys
@@ -61,6 +62,14 @@ def main():
     data = build()
     (dest / "data.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")),
                                     encoding="utf-8")
+    # A content hash names the service worker cache, so every change reaches offline users
+    digest = hashlib.sha256()
+    for f in sorted(dest.rglob("*")):
+        if f.is_file():
+            digest.update(f.relative_to(dest).as_posix().encode() + f.read_bytes())
+    sw = dest / "sw.js"
+    sw.write_text(sw.read_text(encoding="utf-8").replace("__VERSION__", digest.hexdigest()[:12]),
+                  encoding="utf-8")
     print(f"web quiz: {len(data['questions'])} questions -> {dest}")
 
 

@@ -122,8 +122,14 @@ class WebExportTest(unittest.TestCase):
             res = subprocess.run([sys.executable, str(ROOT / "export_web.py"), str(out)],
                                  capture_output=True, text=True, encoding="utf-8", timeout=120)
             self.assertEqual(res.returncode, 0, res.stderr)
-            for name in ("index.html", "app.js", "style.css", "data.json"):
+            for name in ("index.html", "app.js", "style.css", "data.json", "sw.js",
+                         "manifest.webmanifest", "icons/icon-180.png"):
                 self.assertTrue((out / name).exists(), name)
+            sw = (out / "sw.js").read_text(encoding="utf-8")
+            self.assertNotIn("__VERSION__", sw)
+            # Every file the service worker precaches must exist, or install fails offline
+            for path in re.findall(r'"([^"]+)"', sw.split("FILES = [", 1)[1].split("]", 1)[0]):
+                self.assertTrue(path == "./" or (out / path).exists(), path)
             data = json.loads((out / "data.json").read_text(encoding="utf-8"))
         qs = data["questions"]
         self.assertEqual(len(qs), len(QUESTIONS))
