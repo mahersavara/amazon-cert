@@ -39,6 +39,9 @@ Progress is saved to `quiz/progress.json` (gitignored).
 | `quiz/test_quiz.py` | Data integrity, glossary and piped-input CLI tests |
 | `quiz/questions.json` | Generated question bank (683 questions), committed |
 | `quiz/quiz.cmd` | Windows launcher |
+| `quiz/export_web.py` | Builds the web quiz: copies `web/` and writes `data.json` with glossary matches precomputed |
+| `web/` | Browser version of the quiz (index.html, app.js, style.css), deployed to GitHub Pages |
+| `.github/workflows/pages.yml` | On push to `main`: run tests, build the web quiz, deploy to Pages |
 
 ## Data provenance
 
@@ -137,3 +140,20 @@ Results: `build_data.py` → `... | translated stem: 683`; `python quiz/test_qui
 Results: `build_data.py` → `... | translated stem: 683 | translated options: 683`;
 `python quiz/test_quiz.py` → 21 tests OK, stable over 3 runs (added: every option translated,
 `r` redraws the bare question); both smoke tests exit 0.
+
+## Follow-up: web version on GitHub Pages
+
+URL: https://mahersavara.github.io/amazon-cert/ (repo is public; Pages source must be "GitHub Actions").
+
+- `web/app.js` mirrors `quiz.py`: the same menu modes (sequential, random, 65-question / 130-minute
+  exam, wrong answers, unseen, jump to #, stats), the same answer check and explanation screen,
+  and buttons for translate (V), keywords (K), service hints (H, not in exams), refresh (R),
+  skip (S) and menu (Q). The same keys work on a desktop keyboard; A–F select, Enter answers.
+- Glossary matching stays in Python: `export_web.py` stores hint/term/service indexes per
+  question, so the browser never runs the regexes. `data.json` is about 1.9 MB (~0.5 MB gzipped).
+- Progress is kept in the browser's localStorage, separate from the terminal's `progress.json`.
+- Checked in headless Chromium at iPhone 13 and 1200px desktop sizes: home, answering single and
+  multi-answer questions, translate/refresh panels, explanation, exam submit + results, stats,
+  progress surviving a reload, keyboard keys; no console errors.
+- `python quiz/test_quiz.py` → 22 tests OK (added: the export builds a complete site with valid
+  indexes).
