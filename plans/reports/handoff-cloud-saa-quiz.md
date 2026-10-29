@@ -34,6 +34,7 @@ Progress is saved to `quiz/progress.json` (gitignored).
 | `quiz/answer_overrides.json` | 76 hand-verified answers + Vietnamese explanations; can also replace a stem or options the PDF got wrong |
 | `quiz/explanations_vi.json` | Vietnamese explanations for the other 607 questions (source answer kept) |
 | `quiz/stems_vi.json` | Vietnamese scenario summary + full translation for every stem (hotkey `v`) |
+| `quiz/options_vi.json` | Vietnamese translation of every answer option (hotkey `v`, under the stem translation) |
 | `quiz/stem_notes.json` | Text descriptions of policy images lost in extraction (#96, #253, #423, #429, #494), shown with the question |
 | `quiz/test_quiz.py` | Data integrity, glossary and piped-input CLI tests |
 | `quiz/questions.json` | Generated question bank (683 questions), committed |
@@ -123,3 +124,16 @@ with the implied question; the lost-image stems point to the restored policy not
 
 Results: `build_data.py` → `... | translated stem: 683`; `python quiz/test_quiz.py` → 19 tests OK
 (added: every stem translated, term matching, `v`/`k` in the CLI); both smoke tests exit 0.
+
+## Follow-up: translated options + refresh key
+
+- `v` now also prints "🔠 Dịch đáp án": every option of the question in Vietnamese
+  (`quiz/options_vi.json`, 683/683 questions, merged as `options_vi` by `build_data.py`). AWS
+  service and feature names stay in English, as in the exam.
+- New key `r` (also `cls` / `clear`): clears the screen and redraws only the question and its
+  options, dropping translation, keyword and error output. In the timed exam it also redraws the
+  remaining time. `c` was not used because it clashes with option C.
+
+Results: `build_data.py` → `... | translated stem: 683 | translated options: 683`;
+`python quiz/test_quiz.py` → 21 tests OK, stable over 3 runs (added: every option translated,
+`r` redraws the bare question); both smoke tests exit 0.
