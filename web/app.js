@@ -50,6 +50,25 @@ function getSetting(key, fallback) {
   }
 }
 
+// Per-question timer in practice: suggested times come from data.json ("tm", seconds)
+const TIMER_MODES = {
+  off: { label: "Tắt", factor: 0 },
+  relaxed: { label: "Thoải mái", factor: 1.5 },
+  exam: { label: "Nhịp thi thật", factor: 1 },
+};
+
+function timerMode() {
+  try {
+    const m = localStorage.getItem("saa-quiz-timer");
+    return m in TIMER_MODES ? m : "relaxed";
+  } catch (e) {
+    return "relaxed";
+  }
+}
+
+const roundTo15 = (sec) => Math.max(15, Math.round(sec / 15) * 15);
+const clockText = (sec) => `${Math.floor(sec / 60)}:${String(Math.max(0, sec) % 60).padStart(2, "0")}`;
+
 function setSetting(key, on) {
   try { localStorage.setItem("saa-quiz-" + key, on ? "1" : "0"); } catch (e) { /* ignore */ }
 }
@@ -69,11 +88,12 @@ function saveProgress() {
   } catch (e) { /* private mode or storage blocked: progress lasts for this tab only */ }
 }
 
-function record(qid, correct) {
+function record(qid, correct, seconds) {
   const p = progress[qid] || (progress[qid] = { attempts: 0, correct: 0, last: null });
   p.attempts += 1;
   p.correct += correct ? 1 : 0;
   p.last = correct;
+  if (seconds) p.time = Math.round(seconds);
   saveProgress();
 }
 
@@ -99,6 +119,10 @@ function home() {
     <p class="muted">Ngân hàng ${DATA.questions.length} câu, có dịch đề, dịch đáp án và giải thích tiếng Việt.
     Tiến độ lưu ngay trên trình duyệt này.</p>
     ${progressBar()}
+    <div class="card"><div class="row"><b>⏱ Bấm giờ mỗi câu</b><span class="small muted">khi luyện tập</span></div>
+      <div class="seg">${Object.entries(TIMER_MODES).map(([k, m]) =>
+        `<button data-timer="${k}" class="${timerMode() === k ? "on" : ""}">${m.label}</button>`).join("")}</div>
+      <div class="small muted">${timerHelp()}</div></div>
     <div class="menu">
       <div class="menu-item"><div class="label"><b>Luyện tuần tự</b><span class="muted small">Bắt đầu từ câu số</span></div>
         <input id="seqStart" type="number" inputmode="numeric" min="1" max="${maxId}" value="${esc(lastSeq())}">
@@ -123,6 +147,10 @@ function home() {
     <p class="muted small">Phím tắt trên máy tính: A–F chọn, Enter trả lời / câu tiếp, V dịch đề, K từ khóa,
     H so sánh đáp án, R làm mới, S bỏ qua, Q về menu.</p>`);
   app.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => startMode(b.dataset.go)));
+  app.querySelectorAll("[data-timer]").forEach((b) => b.addEventListener("click", () => {
+    try { localStorage.setItem("saa-quiz-timer", b.dataset.timer); } catch (e) { /* ignore */ }
+    home();
+  }));
 }
 
 function progressBar() {
@@ -134,6 +162,14 @@ function progressBar() {
     <div class="bar"><span style="width:${pct}%"></span></div>
     <div class="small muted">Đúng ở lần gần nhất: ${right} · đang sai: ${seen.length - right}</div>
     <div class="toolbar"><button class="primary" data-go="resume">▶ Tiếp tục từ câu #${esc(lastSeq())}</button></div></div>`;
+}
+
+function timerHelp() {
+  const mode = timerMode();
+  if (mode === "off") return "Không giới hạn thời gian.";
+  const pace = mode === "exam" ? "~2 phút/câu như thi thật" : "~3 phút/câu (gấp 1,5 lần thi thật)";
+  return `Trung bình ${pace}, câu dài được nhiều giờ hơn. Hết giờ tự nộp. ` +
+    "Sau đó có 30 giây–2,5 phút đọc giải thích rồi tự sang câu; bấm ⏸ Giữ để đọc lâu hơn.";
 }
 
 function lastSeq() {
@@ -208,12 +244,18 @@ function showQuestion() {
   s.selected = [];
   s.open = {};
   s.view = "question";
+  const factor = exam || s.mode === "review" ? 0 : TIMER_MODES[timerMode()].factor;
+  const limit = factor ? roundTo15(q.tm[0] * factor) : 0;
+  s.limit = limit;
+  s.startedAt = Date.now();
+  s.timedOut = false;
   const hints = !exam && q.h.length
     ? `<div class="card panel hint"><h3>🎯 Phân tích đề</h3><ul>${q.h.map((i) => `<li>${esc(DATA.hints[i])}</li>`).join("")}</ul></div>`
     : "";
   render(`
     <div class="topbar"><span>Câu ${s.i + 1}/${s.list.length} · #${q.id} · ${statLine(q)}</span>
-      ${exam ? '<span class="timer" id="timer"></span>' : `<span>${esc(s.title)}${s.done ? ` · ${s.score}/${s.done}` : ""}</span>`}</div>
+      ${exam ? '<span class="timer" id="timer"></span>' : `<span>${esc(s.title)}${s.done ? ` · ${s.score}/${s.done}` : ""}${limit ? ' · <span class="timer" id="qtimer"></span>' : ""}</span>`}</div>
+    ${limit ? '<div class="qbar"><span id="qbarFill"></span></div>' : ""}
     ${!exam && q.sv ? summaryCard(q) : ""}
     <div class="card"><div class="stem">${exam ? esc(q.q) : stemHtml(q)}</div>
       ${q.note ? `<div class="card panel note"><h3>🖼 Bổ sung phần hình bị mất</h3><div class="stem">${esc(q.note)}</div></div>` : ""}
@@ -237,6 +279,7 @@ function showQuestion() {
   document.getElementById("answerBtn").addEventListener("click", submitAnswer);
   bindSummary(q);
   if (exam) startTimer();
+  else if (limit) startClock(limit, timeUp);
 }
 
 // One-line Vietnamese summary of the scenario, shown above the English stem in practice
@@ -348,16 +391,25 @@ function answer(picked) {
     s.picks[q.id] = picked;
     return next();
   }
-  if (picked.length) {
+  const used = (Date.now() - s.startedAt) / 1000;
+  s.timing = s.limit ? { used, limit: s.limit, timedOut: s.timedOut } : null;
+  // Running out of time counts as an answer, even with nothing (or too little) picked
+  if (picked.length || s.timedOut) {
     s.done += 1;
     const ok = sameAnswer(picked, q.a);
     s.score += ok ? 1 : 0;
-    if (q.a.length) record(q.id, ok);
+    if (q.a.length) record(q.id, ok, used);
   }
   if (s.title === "tuần tự") {
     try { localStorage.setItem("saa-quiz-seq", String(q.id + 1)); } catch (e) { /* ignore */ }
   }
   showExplanation(q, picked);
+}
+
+function timeUp() {
+  const s = session;
+  s.timedOut = true;
+  answer(s.selected.slice());
 }
 
 function next() {
@@ -369,12 +421,16 @@ function next() {
 
 // ---------- explanation ----------
 
-function explanationHtml(q, picked) {
+function explanationHtml(q, picked, timing) {
   const ans = q.a;
   let banner;
   if (!ans.length) banner = `<div class="banner warn">⚠ Nguồn không có đáp án cho câu này, tự đối chiếu bằng phân tích bên dưới.</div>`;
   else if (sameAnswer(picked, ans)) banner = `<div class="banner ok">✔ ĐÚNG! Đáp án: ${ans.join("")}</div>`;
-  else banner = `<div class="banner bad">✘ SAI. Bạn chọn: ${picked.join("") || "(bỏ qua)"} · Đáp án đúng: ${ans.join("")}</div>`;
+  else banner = `<div class="banner bad">✘ SAI. Bạn chọn: ${picked.join("") || (timing && timing.timedOut ? "(chưa chọn)" : "(bỏ qua)")} · Đáp án đúng: ${ans.join("")}</div>`;
+  if (timing) {
+    const over = timing.timedOut ? "⏰ Hết giờ" : `Trả lời trong ${clockText(Math.round(timing.used))}`;
+    banner += `<div class="small muted timing">${over} · thời gian gợi ý ${clockText(timing.limit)}</div>`;
+  }
 
   const cls = (k) => (ans.includes(k) ? "correct" : picked.includes(k) ? "wrong" : "");
   const extra = (k) => {
@@ -401,21 +457,32 @@ function explanationHtml(q, picked) {
 function showExplanation(q, picked) {
   const s = session;
   s.open = {};
+  // Review time before moving on: longer after a wrong answer. After a timeout the screen
+  // waits for the learner, so an idle phone loses one question instead of marching on.
+  const right = q.a.length && sameAnswer(picked, q.a);
+  const review = s.timing && !s.timing.timedOut ? roundTo15(q.tm[right ? 1 : 2]) : 0;
   render(`
     <div class="topbar"><span>Câu ${s.i + 1}/${s.list.length} · #${q.id}</span>
       <span>${esc(s.title)} · ${s.score}/${s.done}</span></div>
-    ${explanationHtml(q, picked)}
+    ${explanationHtml(q, picked, s.timing)}
     <div class="toolbar">
       <button data-act="v">🇻🇳 Dịch đề<span class="kbd">V</span></button>
       <button data-act="k">🔤 Từ khóa<span class="kbd">K</span></button>
       <button data-act="q">Về menu<span class="kbd">Q</span></button>
     </div>
     <div id="panels"></div>
-    ${bottomBar(`<button class="primary" id="nextBtn">${s.i + 1 < s.list.length ? "Câu tiếp" : "Xem kết quả"} →</button>`)}`);
+    ${bottomBar(`${review ? '<button id="pauseBtn">⏸ Giữ</button>' : ""}<button class="primary" id="nextBtn">${s.i + 1 < s.list.length ? "Câu tiếp" : "Xem kết quả"} →${review ? ' <span id="qtimer"></span>' : ""}</button>`)}`);
   s.view = "explain";
   app.querySelectorAll(".opt").forEach((b) => { b.disabled = true; });
   app.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => act(b.dataset.act)));
   document.getElementById("nextBtn").addEventListener("click", next);
+  if (review) {
+    startClock(review, next);
+    document.getElementById("pauseBtn").addEventListener("click", (e) => {
+      const paused = toggleClock();
+      e.currentTarget.textContent = paused ? "▶ Chạy" : "⏸ Giữ";
+    });
+  }
 }
 
 function summary() {
@@ -445,6 +512,45 @@ function startTimer() {
   };
   tick();
   timerHandle = setInterval(tick, 1000);
+}
+
+// Countdown for one practice screen; shows in #qtimer and the #qbarFill bar
+let clock = null;
+
+function startClock(seconds, onEnd) {
+  stopTimer();
+  clock = { end: Date.now() + seconds * 1000, total: seconds, left: seconds, paused: false, onEnd };
+  tickClock();
+  timerHandle = setInterval(tickClock, 250);
+}
+
+function tickClock() {
+  if (!clock || clock.paused) return;
+  clock.left = Math.max(0, Math.ceil((clock.end - Date.now()) / 1000));
+  const el = document.getElementById("qtimer");
+  if (el) {
+    el.textContent = `⏱ ${clockText(clock.left)}`;
+    el.classList.toggle("low", clock.left <= 30);
+  }
+  const bar = document.getElementById("qbarFill");
+  if (bar) {
+    bar.style.width = `${(clock.left / clock.total) * 100}%`;
+    bar.classList.toggle("low", clock.left <= 30);
+  }
+  if (clock.left <= 0) {
+    const done = clock.onEnd;
+    stopTimer();
+    clock = null;
+    done();
+  }
+}
+
+// Pauses or resumes the running countdown; returns true when now paused
+function toggleClock() {
+  if (!clock) return false;
+  clock.paused = !clock.paused;
+  if (!clock.paused) clock.end = Date.now() + clock.left * 1000;
+  return clock.paused;
 }
 
 function stopTimer() {
@@ -515,12 +621,15 @@ function stats() {
   const attempts = seen.reduce((n, p) => n + p.attempts, 0);
   const correct = seen.reduce((n, p) => n + p.correct, 0);
   const wrongNow = seen.filter((p) => p.last === false).length;
+  const timed = seen.filter((p) => p.time);
+  const avgTime = timed.length ? clockText(Math.round(timed.reduce((n, p) => n + p.time, 0) / timed.length)) : "–";
   render(`<h1>Thống kê</h1>
     <div class="stats">
       <div class="stat"><b>${seen.length}/${DATA.questions.length}</b>Câu đã làm</div>
       <div class="stat"><b>${attempts}</b>Lượt trả lời</div>
       <div class="stat"><b>${attempts ? Math.floor(correct * 100 / attempts) : 0}%</b>Tỷ lệ đúng</div>
       <div class="stat"><b>${wrongNow}</b>Đang sai</div>
+      <div class="stat"><b>${avgTime}</b>Thời gian TB/câu (thi thật ~2:00)</div>
     </div>
     <p class="muted small">Tiến độ chỉ lưu trên trình duyệt này; điện thoại và máy tính có tiến độ riêng.</p>
     ${bottomBar('<button id="resetBtn">Xóa tiến độ</button><button class="primary" id="homeBtn">Về menu</button>')}`);
