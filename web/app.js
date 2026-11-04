@@ -438,14 +438,20 @@ function explanationHtml(q, picked, timing) {
     // Only the notes that set this option apart (shared services are not repeated)
     const notes = q.xd[k].map((i) => `• ${esc(DATA.services[i][0])}: ${esc(DATA.services[i][1])}`);
     const vi = q.ov && q.ov[k] && q.ov[k] !== q.o[k] ? `<span class="vi">${esc(q.ov[k])}</span>` : "";
-    return vi + (verdict ? `<span class="verdict">→ ${verdict}</span>` : "") +
+    // Why this option is right or wrong, shown right under it
+    const why = q.xr && q.xr[k] ? `<span class="why">${esc(q.xr[k])}</span>` : "";
+    const label = verdict || (why ? "sai" : "");
+    return vi + (label ? `<span class="verdict">→ ${label}</span>` : "") + why +
       (notes.length ? `<span class="notes">${notes.join("<br>")}</span>` : "");
   };
 
+  // Per-option reasons moved under the options; the card keeps the overall reasoning
+  const summary = q.xs !== undefined ? q.xs : q.m ? q.e : q.evi;
+  const summaryHtml = summary ? `<div class="explain">${esc(summary)}</div>` : "";
   let explain = "";
-  if (q.m) explain = `<div class="card"><h2>📖 Giải thích</h2><div class="explain">${esc(q.e)}</div></div>`;
+  if (q.m) explain = summary ? `<div class="card"><h2>📖 Giải thích</h2>${summaryHtml}</div>` : "";
   else if (q.evi) {
-    explain = `<div class="card"><h2>📖 Giải thích</h2><div class="explain">${esc(q.evi)}</div>
+    explain = `<div class="card"><h2>📖 Giải thích</h2>${summaryHtml}
       ${q.e ? `<details><summary>📄 Giải thích gốc (tiếng Anh)</summary><div class="explain muted">${esc(q.e)}</div></details>` : ""}</div>`;
   } else if (q.e) explain = `<div class="card"><h2>📖 Giải thích (tiếng Anh)</h2><div class="explain">${esc(q.e)}</div></div>`;
 

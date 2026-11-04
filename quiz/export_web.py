@@ -13,8 +13,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from quiz import (load_questions, option_differences, requirement_hints,  # noqa: E402
-                  requirement_spans, services_in, suggested_times, terms_in)
+from quiz import (load_questions, option_differences, option_reasons,  # noqa: E402
+                  requirement_hints, requirement_spans, services_in, suggested_times,
+                  terms_in, vi_explanation)
 
 WEB = ROOT.parent / "web"
 
@@ -58,6 +59,13 @@ def build():
             "xd": {k: [services.add(list(n)) for n in notes
                        if n[0] in dict(services_in(q["options"][k]))] for k, notes in diff.items()},
         }
+        # Explanation split per option: "xr" reasons sit under each option, "xs" is what is
+        # left for the explanation card (only stored when it differs from the full text)
+        summary, reasons = option_reasons(q)
+        if reasons:
+            item["xr"] = reasons
+            if summary != vi_explanation(q):
+                item["xs"] = summary
         for src, dst in (("explanation_vi", "evi"), ("note", "note"), ("stem_vi", "sv"),
                          ("options_vi", "ov"), ("manual", "m")):
             if q.get(src):
