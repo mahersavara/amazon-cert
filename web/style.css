@@ -109,6 +109,8 @@ button.on { background: var(--accent-soft); border-color: var(--accent); }
 .opt .verdict { display: block; font-size: .8rem; font-weight: 600; margin-top: 2px; }
 .opt.correct .verdict { color: var(--ok); }
 .opt.wrong .verdict { color: var(--bad); }
+.opt:not(.correct):not(.wrong) .verdict { color: var(--muted); }
+.opt .why { display: block; font-size: .9rem; margin-top: 2px; }
 .opt .notes { display: block; font-size: .85rem; color: var(--muted); margin-top: 4px; }
 .choose { color: var(--hint); font-weight: 600; margin-top: 10px; }
 

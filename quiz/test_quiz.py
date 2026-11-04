@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 from aws_glossary import KEYWORDS, SERVICES, TERMS  # noqa: E402
-from quiz import (option_differences, requirement_hints, services_in, suggested_times,  # noqa: E402
-                  terms_in)
+from quiz import (load_questions, option_differences, option_reasons,  # noqa: E402
+                  requirement_hints, services_in, suggested_times, terms_in)
 
 
 def load(name):
@@ -122,6 +122,20 @@ class GlossaryTest(unittest.TestCase):
         for k in "ABCD":
             self.assertNotIn("S3", names[k])
             self.assertNotIn("principal", names[k])
+
+    def test_option_reasons(self):
+        loaded = {q["id"]: q for q in load_questions()}
+        summary, reasons = option_reasons(loaded[28])
+        self.assertTrue(summary.startswith("SSO cho mọi account"))
+        self.assertEqual(sorted(reasons), ["A", "C", "D"])
+        self.assertTrue(reasons["A"].startswith("one-way trust"))
+        # A reason shared by several options keeps their letters
+        _, reasons = option_reasons(loaded[58])
+        self.assertTrue(reasons["A"] == reasons["D"] and reasons["A"].startswith("A/B/D"))
+        # Nearly every explanation names a reason for each wrong option
+        split = [q for q in loaded.values()
+                 if set(option_reasons(q)[1]) >= set(q["options"]) - set(q["answer"])]
+        self.assertGreater(len(split), 640)
 
     def test_suggested_times_match_exam_pace(self):
         times = [suggested_times(q) for q in QUESTIONS]

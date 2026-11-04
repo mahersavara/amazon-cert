@@ -205,6 +205,46 @@ def option_differences(q):
     return common, diff
 
 
+# A sentence opening with option letters ("C: ...", "A/B/D: ...", "D, E ...") starts that
+# option's reason inside a Vietnamese explanation.
+REASON_MARK = re.compile(r"(?:^|(?<=[.!?;]) )([A-F](?:\s*(?:,|/|\+|và)\s*[A-F])*)(?:\s*:\s*|\s+(?=\S))")
+
+
+def vi_explanation(q):
+    """The Vietnamese explanation text, if the question has one."""
+    if q.get("manual"):
+        return q["explanation"]
+    return q.get("explanation_vi", "")
+
+
+def option_reasons(q):
+    """Split a Vietnamese explanation into (summary, {letter: reason}).
+
+    Explanations read "summary → answer. A: why. B/C: why." When every wrong option
+    gets its own reason, the summary is the text before the first one; otherwise the
+    whole explanation stays the summary (some reasons sit in unlabeled sentences) and
+    the labeled reasons that were found are still returned.
+    """
+    text = vi_explanation(q)
+    letters = set(q["options"])
+    marks = []
+    for m in REASON_MARK.finditer(text):
+        group = re.findall(r"[A-F]", m.group(1))
+        if group and set(group) <= letters:
+            marks.append((m, group))
+    reasons = {}
+    for i, (m, group) in enumerate(marks):
+        end = marks[i + 1][0].start() if i + 1 < len(marks) else len(text)
+        # A shared reason keeps its letters ("A/B/D đều ..."); a single one drops the label
+        body = text[m.start() if len(group) > 1 else m.end():end].strip()
+        for k in group:
+            reasons[k] = f"{reasons[k]} {body}" if k in reasons else body
+    wrong = letters - set(q["answer"])
+    if not wrong <= set(reasons):
+        return text, reasons
+    return text[:marks[0][0].start()].strip(), reasons
+
+
 def show_service_hints(q):
     print(color("🔎 Khác biệt giữa các đáp án:", "cyan", "bold"))
     for h in requirement_hints(q["question"]):
@@ -276,6 +316,7 @@ def show_explanation(q, picked):
         print(color("  (Đáp án ghép tự động từ file solution, độ tin cậy thấp — nên kiểm tra lại)",
                     "yellow"))
 
+    summary, reasons = option_reasons(q)
     print(color("\n📋 Giải thích từng đáp án:", "cyan", "bold"))
     noted = set()  # a service note is shown once, under the first option naming it
     for letter, text in q["options"].items():
@@ -286,18 +327,23 @@ def show_explanation(q, picked):
         else:
             mark, tone, verdict = "·", "dim", "sai" if answer else "?"
         print(wrap(text, color(f"  {mark} {letter}. ", tone, "bold"), "      "))
-        print(color(f"      → {verdict}", tone))
+        # Why this option is right or wrong, right under it
+        reason = f": {reasons[letter]}" if letter in reasons else ""
+        print(wrap(f"→ {verdict}{reason}", "      ", "        ") if reason
+              else color(f"      → {verdict}", tone))
         for name, note in services_in(text):
             if name not in noted:
                 noted.add(name)
                 print(wrap(f"{name}: {note}", color("      • ", "dim"), "        "))
 
     if q.get("manual"):
-        print(color("\n📖 Giải thích (tiếng Việt):", "cyan", "bold"))
-        print(wrap(q["explanation"], "   ", "   "))
+        if summary:
+            print(color("\n📖 Giải thích (tiếng Việt):", "cyan", "bold"))
+            print(wrap(summary, "   ", "   "))
     elif q.get("explanation_vi"):
-        print(color("\n📖 Giải thích (tiếng Việt):", "cyan", "bold"))
-        print(wrap(q["explanation_vi"], "   ", "   "))
+        if summary:
+            print(color("\n📖 Giải thích (tiếng Việt):", "cyan", "bold"))
+            print(wrap(summary, "   ", "   "))
         print(color("\n📄 Giải thích gốc (tiếng Anh):", "dim", "bold"))
         print(color(wrap(q["explanation"], "   ", "   "), "dim"))
     elif q["explanation"]:
