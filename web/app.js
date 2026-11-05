@@ -144,7 +144,7 @@ function home() {
         <button data-go="stats">Mở</button></div>
     </div>
     <p class="small" id="offline">${offlineText()}</p>
-    <p class="muted small">Phím tắt trên máy tính: A–F chọn, Enter trả lời / câu tiếp, V dịch đề, K từ khóa,
+    <p class="muted small">Phím tắt trên máy tính: A–F hoặc 1–6 chọn, Enter trả lời / câu tiếp, V dịch đề, K từ khóa,
     H so sánh đáp án, R làm mới, S bỏ qua, Q về menu.</p>`);
   app.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => startMode(b.dataset.go)));
   app.querySelectorAll("[data-timer]").forEach((b) => b.addEventListener("click", () => {
@@ -661,7 +661,8 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   const q = session.list[session.i];
-  const letter = key.toUpperCase();
+  // A–F pick by letter; 1–6 pick the Nth option (numpad too)
+  const letter = /^[1-6]$/.test(key) ? Object.keys(q.o)[key - 1] : key.toUpperCase();
   if (key.length === 1 && letter in q.o) toggle(letter);
   else if (key === "enter") submitAnswer();
   else if ("vkhrsq".includes(key) && key.length === 1) act(key);
