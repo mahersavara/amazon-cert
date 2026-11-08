@@ -144,7 +144,7 @@ function home() {
         <button data-go="stats">Mở</button></div>
     </div>
     <p class="small" id="offline">${offlineText()}</p>
-    <p class="muted small">Phím tắt trên máy tính: A–F hoặc 1–6 chọn, Enter trả lời / câu tiếp, V dịch đề, K từ khóa,
+    <p class="muted small">Phím tắt trên máy tính: A–F hoặc 1–6 chọn, Enter trả lời / câu tiếp, ← câu trước, V dịch đề, K từ khóa,
     H so sánh đáp án, R làm mới, S bỏ qua, Q về menu.</p>`);
   app.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => startMode(b.dataset.go)));
   app.querySelectorAll("[data-timer]").forEach((b) => b.addEventListener("click", () => {
@@ -213,7 +213,7 @@ function startMode(mode) {
 
 function practice(list, title) {
   if (!list.length) return home();
-  session = { mode: "practice", list, i: 0, title, score: 0, done: 0 };
+  session = { mode: "practice", list, i: 0, title, score: 0, done: 0, answers: {} };
   showQuestion();
 }
 
@@ -241,7 +241,8 @@ function showQuestion() {
   const s = session;
   const q = s.list[s.i];
   const exam = s.mode === "exam";
-  s.selected = [];
+  // Exam keeps the earlier pick when the learner comes back to change it
+  s.selected = exam && s.picks[q.id] ? s.picks[q.id].slice() : [];
   s.open = {};
   s.view = "question";
   const factor = exam || s.mode === "review" ? 0 : TIMER_MODES[timerMode()].factor;
@@ -278,6 +279,8 @@ function showQuestion() {
   app.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => act(b.dataset.act)));
   document.getElementById("answerBtn").addEventListener("click", submitAnswer);
   bindSummary(q);
+  app.querySelectorAll(".opt").forEach((b) => b.classList.toggle("selected", s.selected.includes(b.dataset.letter)));
+  document.getElementById("answerBtn").disabled = s.selected.length !== q.c;
   if (exam) startTimer();
   else if (limit) startClock(limit, timeUp);
 }
@@ -400,10 +403,22 @@ function answer(picked) {
     s.score += ok ? 1 : 0;
     if (q.a.length) record(q.id, ok, used);
   }
+  s.answers[s.i] = { picked, timing: s.timing };
   if (s.title === "tuần tự") {
     try { localStorage.setItem("saa-quiz-seq", String(q.id + 1)); } catch (e) { /* ignore */ }
   }
   showExplanation(q, picked);
+}
+
+// ← key: back to the previous question. Practice shows its saved explanation (no re-record);
+// exam shows it again with the earlier pick selected.
+function back() {
+  const s = session;
+  if (s.mode === "review" || s.i === 0) return;
+  s.i -= 1;
+  if (s.mode === "exam") return showQuestion();
+  const seen = s.answers[s.i];
+  showExplanation(s.list[s.i], seen.picked, seen.timing, true);
 }
 
 function timeUp() {
@@ -416,6 +431,9 @@ function next() {
   const s = session;
   s.i += 1;
   if (s.i >= s.list.length) return s.mode === "exam" ? finishExam(false) : summary();
+  // After browsing back, move forward through saved explanations before any new question
+  const seen = s.mode === "practice" && s.answers[s.i];
+  if (seen) return showExplanation(s.list[s.i], seen.picked, seen.timing, true);
   showQuestion();
 }
 
@@ -455,22 +473,24 @@ function explanationHtml(q, picked, timing) {
       ${q.e ? `<details><summary>📄 Giải thích gốc (tiếng Anh)</summary><div class="explain muted">${esc(q.e)}</div></details>` : ""}</div>`;
   } else if (q.e) explain = `<div class="card"><h2>📖 Giải thích (tiếng Anh)</h2><div class="explain">${esc(q.e)}</div></div>`;
 
-  // Explanation first (the learner just read the stem); the stem stays one tap away
-  return `${banner}${explain}<div class="card"><details><summary>Xem lại đề</summary>
-    <div class="stem">${stemHtml(q)}</div></details>${optionList(q, cls, extra)}</div>`;
+  // Order: result, question, options with verdicts, then explanation. The question stays
+  // visible so the options and reasons below it can be read in context.
+  return `${banner}<div class="card"><h2>📝 Đề bài</h2><div class="stem">${stemHtml(q)}</div></div>
+    <div class="card">${optionList(q, cls, extra)}</div>${explain}`;
 }
 
-function showExplanation(q, picked) {
+function showExplanation(q, picked, timing = session.timing, browse = false) {
   const s = session;
   s.open = {};
   // Review time before moving on: longer after a wrong answer. After a timeout the screen
   // waits for the learner, so an idle phone loses one question instead of marching on.
+  // Browsing back to an earlier answer (browse) never starts the clock: the learner stays put.
   const right = q.a.length && sameAnswer(picked, q.a);
-  const review = s.timing && !s.timing.timedOut ? roundTo15(q.tm[right ? 1 : 2]) : 0;
+  const review = !browse && timing && !timing.timedOut ? roundTo15(q.tm[right ? 1 : 2]) : 0;
   render(`
     <div class="topbar"><span>Câu ${s.i + 1}/${s.list.length} · #${q.id}</span>
       <span>${esc(s.title)} · ${s.score}/${s.done}</span></div>
-    ${explanationHtml(q, picked, s.timing)}
+    ${explanationHtml(q, picked, timing)}
     <div class="toolbar">
       <button data-act="v">🇻🇳 Dịch đề<span class="kbd">V</span></button>
       <button data-act="k">🔤 Từ khóa<span class="kbd">K</span></button>
@@ -658,6 +678,9 @@ document.addEventListener("keydown", (e) => {
     if (key === "enter") document.getElementById("nextBtn").click();
     else if (key === "v" || key === "k") togglePanel(key);
     else if (key === "q" && session.mode !== "review") act("q");
+    else if (key === "arrowleft") back();
+    else return;
+    e.preventDefault();
     return;
   }
   const q = session.list[session.i];
@@ -666,6 +689,7 @@ document.addEventListener("keydown", (e) => {
   if (key.length === 1 && letter in q.o) toggle(letter);
   else if (key === "enter") submitAnswer();
   else if ("vkhrsq".includes(key) && key.length === 1) act(key);
+  else if (key === "arrowleft") back();
   else return;
   e.preventDefault();
 });
