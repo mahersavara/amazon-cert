@@ -473,9 +473,10 @@ function explanationHtml(q, picked, timing) {
       ${q.e ? `<details><summary>📄 Giải thích gốc (tiếng Anh)</summary><div class="explain muted">${esc(q.e)}</div></details>` : ""}</div>`;
   } else if (q.e) explain = `<div class="card"><h2>📖 Giải thích (tiếng Anh)</h2><div class="explain">${esc(q.e)}</div></div>`;
 
-  // Explanation first (the learner just read the stem); the stem stays one tap away
-  return `${banner}${explain}<div class="card"><details><summary>Xem lại đề</summary>
-    <div class="stem">${stemHtml(q)}</div></details>${optionList(q, cls, extra)}</div>`;
+  // Order: result, question, options with verdicts, then explanation. The question stays
+  // visible so the options and reasons below it can be read in context.
+  return `${banner}<div class="card"><h2>📝 Đề bài</h2><div class="stem">${stemHtml(q)}</div></div>
+    <div class="card">${optionList(q, cls, extra)}</div>${explain}`;
 }
 
 function showExplanation(q, picked, timing = session.timing, browse = false) {
