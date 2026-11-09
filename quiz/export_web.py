@@ -13,9 +13,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
+from aws_glossary import TOPICS  # noqa: E402
 from quiz import (load_questions, option_differences, option_reasons,  # noqa: E402
                   requirement_hints, requirement_spans, services_in, suggested_times,
-                  terms_in, vi_explanation)
+                  terms_in, topics_of, vi_explanation)
 
 WEB = ROOT.parent / "web"
 
@@ -48,6 +49,8 @@ def build():
             "hl": requirement_spans(q["question"]),
             # Suggested seconds: answering, then reviewing after a right / wrong answer
             "tm": [answer_s, right_s, wrong_s],
+            # Study topics (keys of "topics") for "Luyện theo chủ đề"
+            "tp": topics_of(q),
             "t": [terms.add(list(t)) for t in terms_in(text)],
             "s": [services.add(list(s)) for s in services_in(q["question"])],
             "os": {k: [services.add(list(s)) for s in services_in(v)]
@@ -72,7 +75,8 @@ def build():
                 item[dst] = q[src]
         out.append(item)
     return {"questions": out, "hints": hints.items, "terms": terms.items,
-            "services": services.items}
+            "services": services.items,
+            "topics": [{"key": k, "label": label, "eg": eg} for k, label, eg, _ in TOPICS]}
 
 
 def main():

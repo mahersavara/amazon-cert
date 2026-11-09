@@ -11,9 +11,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from aws_glossary import KEYWORDS, SERVICES, TERMS  # noqa: E402
+from aws_glossary import KEYWORDS, SERVICES, TERMS, TOPICS  # noqa: E402
 from quiz import (load_questions, option_differences, option_reasons,  # noqa: E402
-                  requirement_hints, services_in, suggested_times, terms_in)
+                  requirement_hints, services_in, suggested_times, terms_in, topics_of)
 
 
 def load(name):
@@ -154,6 +154,24 @@ class GlossaryTest(unittest.TestCase):
         self.assertLess(len(without), 200)
 
 
+class TopicTest(unittest.TestCase):
+    def test_every_service_has_one_topic(self):
+        names = [n for *_, ns in TOPICS for n in ns]
+        self.assertEqual(len(names), len(set(names)), "service in two topics")
+        self.assertEqual(set(names), {n for _, n, _ in SERVICES})
+
+    def test_topics_cover_the_bank(self):
+        tagged = [q for q in QUESTIONS if topics_of(q)]
+        self.assertGreater(len(tagged), 0.98 * len(QUESTIONS))
+        for key, *_ in TOPICS:
+            with self.subTest(topic=key):
+                self.assertGreaterEqual(sum(key in topics_of(q) for q in QUESTIONS), 20)
+
+    def test_topic_follows_the_answer(self):
+        # #1: S3 Transfer Acceleration upload, a storage question
+        self.assertIn("storage", topics_of(BY_ID[1]))
+
+
 class WebExportTest(unittest.TestCase):
     def test_export_builds_site(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -175,6 +193,7 @@ class WebExportTest(unittest.TestCase):
         for q in qs:
             self.assertTrue(all(0 <= i < len(data["hints"]) for i in q["h"]))
             self.assertTrue(all(0 <= i < len(data["terms"]) for i in q["t"]))
+            self.assertTrue(set(q["tp"]) <= {t["key"] for t in data["topics"]})
             self.assertTrue(all(0 <= i < len(data["services"]) for ids in q["os"].values() for i in ids))
             self.assertEqual(sorted(q["os"]), sorted(q["o"]))
             for start, end in q["hl"]:
