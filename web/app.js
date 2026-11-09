@@ -144,6 +144,8 @@ function home() {
       <div class="menu-item"><div class="label"><b>Xem 1 câu theo số #</b><span class="muted small">1–${maxId}</span></div>
         <input id="jumpN" type="number" inputmode="numeric" min="1" max="${maxId}">
         <button class="primary" data-go="jump">Xem</button></div>
+      <div class="menu-item"><div class="label"><b>📖 Phụ lục từ khóa</b><span class="muted small">Tác dụng từng dịch vụ AWS (Aurora, SQS…), thuật ngữ và cụm từ yêu cầu trong đề</span></div>
+        <button data-go="appendix">Mở</button></div>
       <div class="menu-item"><div class="label"><b>Thống kê</b><span class="muted small">Xem tiến độ, xóa tiến độ</span></div>
         <button data-go="stats">Mở</button></div>
     </div>
@@ -237,6 +239,8 @@ function startMode(mode) {
     else alert("Không có câu số này.");
   } else if (mode === "stats") {
     stats();
+  } else if (mode === "appendix") {
+    appendixPage();
   }
 }
 
@@ -686,6 +690,65 @@ function review(list, picks) {
     });
   };
   show();
+}
+
+// ---------- appendix ----------
+
+// Lowercase without Vietnamese accents, so "van hanh" finds "vận hành"
+const fold = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "d").toLowerCase();
+
+// Glossary: each entry is [name, meaning, question ids]; tapping "N câu" practises those questions
+function appendixPage(query = "") {
+  const A = DATA.appendix;
+  const label = Object.fromEntries(DATA.topics.map((t) => [t.key, t.label]));
+  const entry = (name, meaning, ids) => `<div class="gl-item" data-text="${esc(fold(name + " " + meaning))}">
+      <div><b>${esc(name)}</b>${name ? " · " : ""}<span>${esc(meaning)}</span></div>
+      ${ids.length ? `<button class="small" data-ids="${ids.join(",")}" data-name="${esc(name || meaning)}">${ids.length} câu</button>` : ""}</div>`;
+  const section = (title, items) => `<details class="card gl-group" open><summary><b>${esc(title)}</b>
+      <span class="muted small" data-count></span></summary>${items}</details>`;
+  render(`<h1>📖 Phụ lục từ khóa</h1>
+    <p class="muted small">Tác dụng của từng dịch vụ và từ khóa hay gặp. Bấm “N câu” để luyện các câu có từ đó (câu chưa làm / đang sai trước).</p>
+    <input id="glSearch" class="gl-search" type="search" placeholder="Tìm: aurora, sqs, latency, van hanh…" value="${esc(query)}">
+    <h2>☁️ Dịch vụ AWS</h2>
+    ${A.services.map((g) => section(label[g.topic], g.items.map((i) => entry(...i)).join(""))).join("")}
+    <h2>🔤 Thuật ngữ trong đề</h2>
+    ${section("Thuật ngữ", A.terms.map((i) => entry(...i)).join(""))}
+    <h2>🎯 Cụm từ yêu cầu → hướng chọn đáp án</h2>
+    ${section("Cụm từ yêu cầu", A.hints.map(([hint, ids]) => entry("", hint, ids)).join(""))}
+    <p class="muted small" id="glEmpty" hidden>Không có từ khóa nào khớp.</p>
+    ${bottomBar('<button class="primary" id="homeBtn">Về menu</button>')}`);
+  document.getElementById("homeBtn").addEventListener("click", home);
+  app.querySelectorAll("[data-ids]").forEach((b) => b.addEventListener("click", () => {
+    const list = b.dataset.ids.split(",").map((id) => BY_ID[id]).filter(Boolean);
+    const done = (q) => (progress[q.id] && progress[q.id].last === true ? 1 : 0);
+    practice(shuffle(list).sort((x, y) => done(x) - done(y)).slice(0, 20), `từ khóa ${b.dataset.name.slice(0, 40)}`);
+  }));
+  const search = document.getElementById("glSearch");
+  const filter = () => {
+    const words = fold(search.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    app.querySelectorAll(".gl-group").forEach((g) => {
+      let n = 0;
+      g.querySelectorAll(".gl-item").forEach((el) => {
+        const hit = words.every((w) => el.dataset.text.includes(w));
+        el.hidden = !hit;
+        n += hit ? 1 : 0;
+      });
+      g.hidden = !n;
+      g.querySelector("[data-count]").textContent = `${n} mục`;
+      shown += n;
+    });
+    app.querySelectorAll("h2").forEach((h) => {
+      // A section heading hides with all of its groups
+      let el = h.nextElementSibling;
+      let any = false;
+      while (el && el.tagName !== "H2") { if (el.classList.contains("gl-group") && !el.hidden) any = true; el = el.nextElementSibling; }
+      h.hidden = !any;
+    });
+    document.getElementById("glEmpty").hidden = shown > 0;
+  };
+  search.addEventListener("input", filter);
+  filter();
 }
 
 // ---------- stats ----------

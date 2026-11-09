@@ -204,6 +204,15 @@ class WebExportTest(unittest.TestCase):
                 self.assertIn(f'"{src}"', sw)
         qs = data["questions"]
         self.assertEqual(len(qs), len(QUESTIONS))
+        # "Phụ lục": every glossary entry, each pointing at real questions
+        app = data["appendix"]
+        ids = {q["id"] for q in qs}
+        services = {i[0]: i for g in app["services"] for i in g["items"]}
+        self.assertEqual(set(services), {n for _, n, _ in SERVICES})
+        self.assertEqual(len(app["terms"]), len(TERMS))
+        for *_, refs in list(services.values()) + app["terms"] + app["hints"]:
+            self.assertTrue(set(refs) <= ids)
+        self.assertGreater(len(services["Aurora"][2]), 10)
         for q in qs:
             self.assertTrue(all(0 <= i < len(data["hints"]) for i in q["h"]))
             self.assertTrue(all(0 <= i < len(data["terms"]) for i in q["t"]))
