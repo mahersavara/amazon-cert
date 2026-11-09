@@ -70,10 +70,12 @@ h2 { font-size: 1.05rem; margin: 0 0 8px; }
 }
 .menu-item .label { flex: 1 1 200px; }
 .menu-item .label b { display: block; }
-.menu-item input {
+.menu-item input, .menu-item select {
   width: 76px; padding: 8px; font: inherit; color: var(--text);
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
 }
+/* min-width 0: long topic names must not widen the page on phones */
+.menu-item select { width: auto; flex: 1 1 220px; min-width: 0; max-width: 100%; }
 
 /* buttons */
 button {

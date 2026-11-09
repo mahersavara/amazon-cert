@@ -130,6 +130,10 @@ function home() {
       <div class="menu-item"><div class="label"><b>Luyện ngẫu nhiên</b><span class="muted small">Số câu</span></div>
         <input id="randN" type="number" inputmode="numeric" min="1" value="20">
         <button class="primary" data-go="rand">Bắt đầu</button></div>
+      <div class="menu-item"><div class="label"><b>Luyện theo chủ đề</b><span class="muted small">Làm 15–20 câu một nhóm rồi ôn lại câu sai, dễ nhớ hơn nhảy chủ đề</span></div>
+        <select id="topic">${DATA.topics.map((t) => `<option value="${t.key}" ${t.key === lastTopic() ? "selected" : ""}>${esc(topicText(t))}</option>`).join("")}</select>
+        <input id="topicN" type="number" inputmode="numeric" min="1" value="20">
+        <button class="primary" data-go="topic">Bắt đầu</button></div>
       <div class="menu-item"><div class="label"><b>Thi thử</b><span class="muted small">${EXAM_SIZE} câu / ${EXAM_MINUTES} phút, chấm cuối bài, đậu từ ~${PASS_PERCENT}%</span></div>
         <button class="primary" data-go="exam">Vào thi</button></div>
       <div class="menu-item"><div class="label"><b>Ôn câu đang sai</b><span class="muted small">${wrong} câu sai ở lần làm gần nhất</span></div>
@@ -164,6 +168,28 @@ function progressBar() {
     <div class="toolbar"><button class="primary" data-go="resume">▶ Tiếp tục từ câu #${esc(lastSeq())}</button></div></div>`;
 }
 
+// "Lưu trữ (S3, EBS…) · 120/238 đã làm" for the topic picker
+function topicText(t) {
+  const pool = DATA.questions.filter((q) => q.tp.includes(t.key));
+  const seen = pool.filter((q) => q.id in progress).length;
+  return `${t.label} (${t.eg}) · ${seen}/${pool.length} đã làm`;
+}
+
+function lastTopic() {
+  try {
+    return localStorage.getItem("saa-quiz-topic") || DATA.topics[0].key;
+  } catch (e) {
+    return DATA.topics[0].key;
+  }
+}
+
+// Questions of one topic, random order but not-yet-correct ones (new, wrong) before correct ones
+function topicList(key, n) {
+  const pool = shuffle(DATA.questions.filter((q) => q.tp.includes(key)));
+  const done = (q) => (progress[q.id] && progress[q.id].last === true ? 1 : 0);
+  return pool.sort((a, b) => done(a) - done(b)).slice(0, n);
+}
+
 function timerHelp() {
   const mode = timerMode();
   if (mode === "off") return "Không giới hạn thời gian.";
@@ -192,6 +218,11 @@ function startMode(mode) {
     practice(qs.filter((q) => q.id >= start), "tuần tự");
   } else if (mode === "rand") {
     practice(sample(qs, Math.max(1, num("randN") || 20)), "ngẫu nhiên");
+  } else if (mode === "topic") {
+    const key = document.getElementById("topic").value;
+    try { localStorage.setItem("saa-quiz-topic", key); } catch (e) { /* ignore */ }
+    const t = DATA.topics.find((x) => x.key === key);
+    practice(topicList(key, Math.max(1, num("topicN") || 20)), `chủ đề ${t.label}`);
   } else if (mode === "exam") {
     exam();
   } else if (mode === "wrong") {
@@ -513,12 +544,20 @@ function showExplanation(q, picked, timing = session.timing, browse = false) {
 
 function summary() {
   const s = session;
+  // Questions missed in this run (answered wrong or timed out), to review while still fresh
+  const missed = Object.entries(s.answers)
+    .map(([i, a]) => ({ q: s.list[i], a }))
+    .filter(({ q, a }) => q.a.length && (a.picked.length || (a.timing && a.timing.timedOut)) && !sameAnswer(a.picked, q.a))
+    .map(({ q }) => q);
+  const title = s.title.startsWith("ôn lại") ? s.title : `ôn lại ${s.title}`;
   render(`<h1>Kết thúc phiên ${esc(s.title)}</h1>
     <div class="banner ${s.done && s.score * 100 / s.done >= PASS_PERCENT ? "ok" : "warn"}">
       Đúng ${s.score}/${s.done}${s.done ? ` (${Math.floor(s.score * 100 / s.done)}%)` : ""}</div>
-    ${bottomBar('<button class="primary" id="homeBtn">Về menu</button>')}`);
+    ${missed.length ? `<div class="card"><h2>Câu sai trong phiên</h2><div class="wronglist">${missed.map((q) => `<span>#${q.id}</span>`).join(" · ")}</div></div>` : ""}
+    ${bottomBar(`${missed.length ? `<button class="primary" id="redoBtn">Làm lại ${missed.length} câu sai</button>` : ""}<button class="${missed.length ? "" : "primary"}" id="homeBtn">Về menu</button>`)}`);
   session = null;
   document.getElementById("homeBtn").addEventListener("click", home);
+  if (missed.length) document.getElementById("redoBtn").addEventListener("click", () => practice(shuffle(missed), title));
 }
 
 // ---------- exam ----------

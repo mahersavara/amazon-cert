@@ -13,7 +13,7 @@ import textwrap
 import time
 from pathlib import Path
 
-from aws_glossary import KEYWORDS, SERVICES, TERMS
+from aws_glossary import KEYWORDS, SERVICES, TERMS, TOPICS
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "questions.json"
@@ -121,6 +121,28 @@ def services_in(text):
     names = list(found)
     return [(n, found[n]) for n in names
             if not any(o != n and o.startswith(n + " ") for o in names)]
+
+
+TOPIC_OF = {name: key for key, _, _, names in TOPICS for name in names}
+
+
+def topics_of(q):
+    """Return the TOPICS keys a question tests, in TOPICS order.
+
+    A service in a correct option scores 2, one in the stem scores 1. Topics scoring 2+ count
+    (the answer hinges on them, or the stem keeps coming back to them); a question with none
+    falls back to its best-scoring topics, and one naming no service gets no topic.
+    """
+    score = {}
+    texts = [(q["question"], 1)] + [(q["options"][k], 2) for k in q["answer"]]
+    for text, weight in texts:
+        for name, _ in services_in(text):
+            key = TOPIC_OF[name]
+            score[key] = score.get(key, 0) + weight
+    if not score:
+        return []
+    cut = min(2, max(score.values()))
+    return [key for key, *_ in TOPICS if score.get(key, 0) >= cut]
 
 
 def requirement_hints(stem):

@@ -157,6 +157,47 @@ SERVICES = [
     (r"\bSES\b|Simple Email Service", "SES", "Gửi email."),
 ]
 
+# Study topics: (key, Vietnamese label, examples shown in the menu, SERVICES names in the topic).
+# Every SERVICES name belongs to exactly one topic.
+TOPICS = [
+    ("storage", "Lưu trữ", "S3, EBS, EFS, FSx, Storage Gateway",
+     ["S3", "S3 Glacier", "S3 Intelligent-Tiering", "S3 Lifecycle", "S3 Object Lock",
+      "S3 One Zone-IA", "S3 Replication", "S3 Standard-IA", "S3 Transfer Acceleration",
+      "Glacier Deep Archive", "Presigned URL", "EBS", "EBS fast snapshot restore", "EFS",
+      "FSx for Lustre", "FSx for ONTAP", "FSx for OpenZFS", "FSx for Windows", "Instance store",
+      "Storage Gateway", "Snow Family", "DataSync", "Transfer Family", "AWS Backup"]),
+    ("network", "Mạng & phân phối", "VPC, Route 53, CloudFront, ELB, Direct Connect",
+     ["VPC Peering", "Transit Gateway", "NAT Gateway", "NAT instance", "Network ACL",
+      "Gateway endpoint", "PrivateLink / Interface endpoint", "Direct Connect", "VPN", "Route 53",
+      "CloudFront", "Global Accelerator", "ALB", "NLB", "Gateway LB", "Traffic Mirroring",
+      "Network Firewall", "Outposts"]),
+    ("database", "Database", "RDS, Aurora, DynamoDB, ElastiCache, Redshift",
+     ["RDS", "RDS Proxy", "Aurora", "Aurora Global Database", "Aurora Serverless", "Read replica",
+      "Multi-AZ", "DynamoDB", "DynamoDB Global Tables", "DynamoDB Streams", "DAX", "ElastiCache",
+      "DocumentDB", "Neptune", "Keyspaces", "QLDB", "Redshift", "DMS", "SCT"]),
+    ("security", "Bảo mật & IAM", "IAM, KMS, WAF, Cognito, Organizations",
+     ["IAM Identity Center", "IAM group", "IAM role", "IAM user", "execution role",
+      "resource-based policy", "aws:PrincipalOrgID", "aws:PrincipalOrgPaths", "aws:PrincipalTag",
+      "SCP", "Organizations", "Control Tower", "RAM", "KMS", "CloudHSM", "SSE-C", "ACM",
+      "Secrets Manager", "Parameter Store", "WAF", "Shield", "Firewall Manager", "GuardDuty",
+      "Inspector", "Macie", "Security Hub", "Cognito", "Directory Service", "Security Group",
+      "CloudFront OAI/OAC"]),
+    ("compute", "Compute", "EC2, Auto Scaling, Lambda, ECS/EKS, API Gateway",
+     ["EC2", "Auto Scaling", "Scheduled scaling", "Spot", "Dedicated Host", "Placement group",
+      "RI/Savings Plans", "Lambda", "Lambda /tmp", "ECS", "EKS", "Fargate", "Beanstalk",
+      "AWS Batch", "API Gateway", "Compute Optimizer", "MGN", "Elastic DR"]),
+    ("integration", "Tích hợp & streaming", "SQS, SNS, EventBridge, Step Functions, Kinesis",
+     ["SQS", "SQS long polling", "SQS visibility timeout", "SNS", "SES", "EventBridge",
+      "Step Functions", "Amazon MQ", "Kinesis Data Streams", "Firehose", "Kinesis Analytics", "MSK"]),
+    ("analytics", "Analytics & ML", "Athena, Glue, EMR, QuickSight, SageMaker",
+     ["Athena", "Glue", "Glue job bookmarks", "EMR", "Lake Formation", "QuickSight", "OpenSearch",
+      "SageMaker", "Rekognition", "Textract", "Transcribe", "Comprehend"]),
+    ("ops", "Giám sát & chi phí", "CloudWatch, CloudTrail, Config, CloudFormation, Budgets",
+     ["CloudWatch", "CloudWatch Synthetics", "CloudWatch composite alarm", "CloudTrail",
+      "AWS Config", "Systems Manager", "CloudFormation", "Trusted Advisor", "Budgets",
+      "Cost Explorer"]),
+]
+
 KEYWORDS = [
     (r"LEAST (amount of )?operational overhead|LEAST (administrative|management) (overhead|effort)|minimi[sz]e operational",
      "Ít vận hành nhất → ưu tiên dịch vụ managed/serverless, tránh tự dựng EC2, script, cron."),
