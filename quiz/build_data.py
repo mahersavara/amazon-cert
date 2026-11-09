@@ -151,6 +151,9 @@ def main():
     out, low = [], []
     for num in sorted(pdf_q):
         q = pdf_q[num]
+        # Options printed only as images come from answer_overrides.json instead
+        ov = overrides.get(str(num), {})
+        q = {key: ov.get(key, q[key]) for key in ("question", "options")}
         if len(q["options"]) < 2:
             print(f"WARN: Q{num} has {len(q['options'])} options", file=sys.stderr)
             continue

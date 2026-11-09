@@ -290,7 +290,7 @@ function showQuestion() {
     ${limit ? '<div class="qbar"><span id="qbarFill"></span></div>' : ""}
     ${!exam && q.sv ? summaryCard(q) : ""}
     <div class="card"><div class="stem">${exam ? esc(q.q) : stemHtml(q)}</div>
-      ${q.note ? `<div class="card panel note"><h3>🖼 Bổ sung phần hình bị mất</h3><div class="stem">${esc(q.note)}</div></div>` : ""}
+      ${figureHtml(q)}
       ${optionList(q)}
       ${q.c > 1 ? `<div class="choose">→ Chọn ${q.c} đáp án</div>` : ""}
     </div>
@@ -314,6 +314,15 @@ function showQuestion() {
   document.getElementById("answerBtn").disabled = s.selected.length !== q.c;
   if (exam) startTimer();
   else if (limit) startClock(limit, timeUp);
+}
+
+// Figures the stem refers to ("the following policy"), with the text summary of what they show
+function figureHtml(q) {
+  if (!q.img.length && !q.note) return "";
+  const imgs = q.img.map((src, i) =>
+    `<img src="${esc(src)}" alt="Hình ${i + 1} của câu #${q.id}" loading="lazy">`).join("");
+  const note = q.note ? `<div class="small muted">${q.img.length ? "Tóm tắt hình: " : ""}${esc(q.note)}</div>` : "";
+  return `<div class="card panel note figure"><h3>🖼 Hình trong đề</h3>${imgs}${note}</div>`;
 }
 
 // One-line Vietnamese summary of the scenario, shown above the English stem in practice
@@ -506,7 +515,7 @@ function explanationHtml(q, picked, timing) {
 
   // Order: result, question, options with verdicts, then explanation. The question stays
   // visible so the options and reasons below it can be read in context.
-  return `${banner}<div class="card"><h2>📝 Đề bài</h2><div class="stem">${stemHtml(q)}</div></div>
+  return `${banner}<div class="card"><h2>📝 Đề bài</h2><div class="stem">${stemHtml(q)}</div>${figureHtml(q)}</div>
     <div class="card">${optionList(q, cls, extra)}</div>${explain}`;
 }
 

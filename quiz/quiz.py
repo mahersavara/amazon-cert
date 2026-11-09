@@ -187,7 +187,7 @@ def show_question(q, pos, total, progress, hints=True):
     rule(f"Câu {pos}/{total} · #{q['id']} · {stat}")
     print(wrap(q["question"]))
     if q.get("note"):
-        print(color("\n🖼  Bổ sung phần hình bị mất:", "yellow", "bold"))
+        print(color("\n🖼  Nội dung hình trong đề (bản chữ):", "yellow", "bold"))
         print(wrap(q["note"], "   ", "   "))
     print()
     for letter, text in q["options"].items():

@@ -2601,10 +2601,10 @@
   "explanation": "C. Users can terminate an EC2 instance in the us-east-1 Region when the user's source IP is 10.100.100.254.",
   "confident": true,
   "explanation_vi": "Policy chỉ cho terminate khi IP nguồn của user thuộc 10.100.100.0/24, và Deny mọi action EC2 ngoài us-east-1. Vì vậy chỉ terminate được ở us-east-1 VÀ khi IP của user nằm trong dải đó (ví dụ 10.100.100.254) → C. A: các Region khác bị deny. B: điều kiện là IP nguồn của user, không phải IP của instance. D: ngược lại.",
-  "note": "Hình policy bị mất khi trích PDF. Nội dung policy: Statement 1 Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = 10.100.100.0/24. Statement 2 Deny ec2:*, Resource *, Condition StringNotEquals aws:RequestedRegion = us-east-1.",
+  "note": "Nội dung policy: Statement 1 Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = 10.100.100.0/24. Statement 2 Deny ec2:*, Resource *, Condition StringNotEquals aws:RequestedRegion = us-east-1.",
   "stem_vi": {
-   "tinh_huong": "Đọc một IAM policy (gắn cho IAM group) và cho biết tác dụng của nó (xem phần bổ sung hình bị mất).",
-   "dich": "Một admin EC2 tạo policy sau và gắn vào một IAM group có nhiều user (nội dung policy xem ở phần \"Bổ sung phần hình bị mất\"). Tác dụng của policy này là gì?"
+   "tinh_huong": "Đọc một IAM policy (gắn cho IAM group) và cho biết tác dụng của nó (xem hình).",
+   "dich": "Một admin EC2 tạo policy sau và gắn vào một IAM group có nhiều user (nội dung policy xem ở hình). Tác dụng của policy này là gì?"
   },
   "options_vi": {
    "A": "User có thể terminate EC2 ở mọi Region trừ us-east-1.",
@@ -6910,10 +6910,10 @@
   "explanation": "Policy1 chỉ cho xem (Get/List/Describe) với IAM và CloudWatch Logs, nhưng cho toàn quyền ec2:* và ds:*. Policy2 Deny tường minh ds:Delete*. Explicit Deny luôn thắng Allow → không xóa được directory (B). A: IAM chỉ có Get/List, không có DeleteUser. D: Logs chỉ có Get/Describe. Còn lại xóa EC2 instance (ec2:*) → C. Nguyên tắc cần nhớ: Deny tường minh > Allow > mặc định Deny.",
   "confident": true,
   "manual": true,
-  "note": "Hình 2 policy bị mất khi trích PDF. Policy1: Allow iam:Get*, iam:List*, kms:List*, ec2:*, ds:*, logs:Get*, logs:Describe* trên mọi resource. Policy2: Deny ds:Delete* trên mọi resource.",
+  "note": "Policy1: Allow iam:Get*, iam:List*, kms:List*, ec2:*, ds:*, logs:Get*, logs:Describe* trên mọi resource. Policy2: Deny ds:Delete* trên mọi resource.",
   "stem_vi": {
-   "tinh_huong": "Hai policy (xem phần bổ sung hình bị mất) gắn vào một IAM group; user trong group làm được hành động nào.",
-   "dich": "Solutions architect tạo hai IAM policy là Policy1 và Policy2 (nội dung xem phần \"Bổ sung phần hình bị mất\"), cả hai gắn vào một IAM group. Một kỹ sư cloud được thêm vào group dưới dạng IAM user. Kỹ sư này thực hiện được hành động nào?"
+   "tinh_huong": "Hai policy (xem hình) gắn vào một IAM group; user trong group làm được hành động nào.",
+   "dich": "Solutions architect tạo hai IAM policy là Policy1 và Policy2 (nội dung xem ở hình), cả hai gắn vào một IAM group. Một kỹ sư cloud được thêm vào group dưới dạng IAM user. Kỹ sư này thực hiện được hành động nào?"
   },
   "options_vi": {
    "A": "Xóa IAM user",
@@ -11569,10 +11569,10 @@
   "explanation": "Identity-based policy gắn được vào IAM user, group, role. Organization không phải IAM principal (dùng SCP). Tài nguyên ECS/EC2 không gắn trực tiếp policy — chúng nhận quyền qua role (task role / instance profile). (Đề gốc có ảnh JSON policy bị mất khi trích PDF; đáp án không phụ thuộc nội dung JSON.)",
   "confident": true,
   "manual": true,
-  "note": "Hình JSON policy bị mất khi trích PDF. Câu này hỏi loại principal nào gắn được identity-based policy, nên không cần nội dung JSON để trả lời.",
+  "note": "Câu này hỏi loại principal nào gắn được identity-based policy, nên không cần nội dung JSON để trả lời.",
   "stem_vi": {
-   "tinh_huong": "Có một identity-based policy (hình JSON bị mất); hỏi gắn được policy này vào loại IAM principal nào.",
-   "dich": "Solutions architect muốn dùng đoạn JSON sau làm identity-based policy để cấp quyền (nội dung JSON bị mất khi trích PDF, không cần để trả lời). Có thể gắn policy này vào những IAM principal nào? (Chọn hai.)"
+   "tinh_huong": "Có một identity-based policy (JSON trong hình); hỏi gắn được policy này vào loại IAM principal nào.",
+   "dich": "Solutions architect muốn dùng đoạn JSON sau làm identity-based policy để cấp quyền (nội dung JSON ở hình, không cần để trả lời). Có thể gắn policy này vào những IAM principal nào? (Chọn hai.)"
   },
   "options_vi": {
    "A": "Role",
@@ -11733,10 +11733,10 @@
   "explanation": "Đề gốc có ảnh JSON policy (bị mất khi trích PDF). Theo đáp án phổ biến: Statement 1 Allow ec2:* với điều kiện Region us-east-1; Statement 2 Deny ec2:StopInstances và ec2:TerminateInstances khi không có MFA (BoolIfExists aws:MultiFactorAuthPresent=false). Kết quả: mọi action EC2 ở us-east-1, riêng Stop/Terminate cần đăng nhập MFA. Nhớ: mọi statement đều được đánh giá (A sai), explicit Deny thắng Allow.",
   "confident": true,
   "manual": true,
-  "note": "Hình policy bị mất khi trích PDF. Statement 1: Allow ec2:*, Resource *, Condition StringEquals aws:RequestedRegion = us-east-1. Statement 2: Deny ec2:StopInstances và ec2:TerminateInstances, Resource *, Condition BoolIfExists aws:MultiFactorAuthPresent = false.",
+  "note": "Statement 1: Allow ec2:*, Resource *, Condition StringEquals aws:RequestedRegion = us-east-1. Statement 2: Deny ec2:StopInstances và ec2:TerminateInstances, Resource *, Condition BoolIfExists aws:MultiFactorAuthPresent = false.",
   "stem_vi": {
-   "tinh_huong": "Đọc IAM policy duy nhất gắn vào group (xem phần bổ sung hình bị mất) và cho biết quyền thực tế của thành viên.",
-   "dich": "IAM policy sau được gắn vào một IAM group và là policy duy nhất của group (nội dung xem phần \"Bổ sung phần hình bị mất\"). Quyền thực tế của thành viên group theo policy này là gì?"
+   "tinh_huong": "Đọc IAM policy duy nhất gắn vào group (xem hình) và cho biết quyền thực tế của thành viên.",
+   "dich": "IAM policy sau được gắn vào một IAM group và là policy duy nhất của group (nội dung xem ở hình). Quyền thực tế của thành viên group theo policy này là gì?"
   },
   "options_vi": {
    "A": "Thành viên group được làm mọi hành động EC2 trong us-east-1; các statement sau Allow không được áp dụng.",
@@ -13042,6 +13042,34 @@
   }
  },
  {
+  "id": 477,
+  "question": "A group requires permissions to list an Amazon S3 bucket and delete objects from that bucket. An administrator has created the following IAM policy to provide access to the bucket and applied that policy to the group. The group is not able to delete objects in the bucket. The company follows least-privilege access rules. Which statement should a solutions architect add to the policy to correct bucket access?",
+  "options": {
+   "A": "\"Action\": [\"s3:*Object\"], \"Resource\": [\"arn:aws:s3:::bucket-name/*\"], \"Effect\": \"Allow\"",
+   "B": "\"Action\": [\"s3:*\"], \"Resource\": [\"arn:aws:s3:::bucket-name/*\"], \"Effect\": \"Allow\"",
+   "C": "\"Action\": [\"s3:DeleteObject\"], \"Resource\": [\"arn:aws:s3:::bucket-name*\"], \"Effect\": \"Allow\"",
+   "D": "\"Action\": [\"s3:DeleteObject\"], \"Resource\": [\"arn:aws:s3:::bucket-name/*\"], \"Effect\": \"Allow\""
+  },
+  "choose": 1,
+  "answer": [
+   "D"
+  ],
+  "explanation": "s3:ListBucket áp lên bucket (arn:aws:s3:::bucket-name), còn s3:DeleteObject áp lên object (arn:aws:s3:::bucket-name/*). Policy hiện tại chỉ có ARN của bucket nên DeleteObject không khớp object nào → thêm statement Allow s3:DeleteObject trên bucket-name/* → D. A: s3:*Object cho cả GetObject, PutObject… thừa quyền. B: s3:* thừa quyền nhất. C: bucket-name* khớp cả các bucket khác tên bắt đầu bằng bucket-name (vd bucket-name-prod), sai least-privilege.",
+  "confident": true,
+  "manual": true,
+  "note": "Policy hiện tại (hình): một statement Allow s3:ListBucket và s3:DeleteObject, Resource chỉ có arn:aws:s3:::bucket-name (ARN của bucket, không có /*).",
+  "stem_vi": {
+   "tinh_huong": "Group cần list bucket S3 và xóa object, nhưng policy hiện tại không xóa được object. Thêm statement nào theo least-privilege?",
+   "dich": "Một group cần quyền list một bucket Amazon S3 và xóa object trong bucket đó. Admin đã tạo IAM policy sau để cấp quyền truy cập bucket và gắn policy cho group. Group không xóa được object trong bucket. Công ty tuân theo nguyên tắc least-privilege. Solutions architect nên thêm statement nào vào policy để sửa quyền truy cập bucket?"
+  },
+  "options_vi": {
+   "A": "Allow s3:*Object (mọi action kết thúc bằng Object) trên arn:aws:s3:::bucket-name/*",
+   "B": "Allow s3:* (mọi action S3) trên arn:aws:s3:::bucket-name/*",
+   "C": "Allow s3:DeleteObject trên arn:aws:s3:::bucket-name* (không có dấu /)",
+   "D": "Allow s3:DeleteObject trên arn:aws:s3:::bucket-name/*"
+  }
+ },
+ {
   "id": 478,
   "question": "A law firm needs to share information with the public. The information includes hundreds of files that must be publicly readable. Modifications or deletions of the files by anyone before a designated future date are prohibited. Which solution will meet these requirements in the MOST secure way?",
   "options": {
@@ -13498,10 +13526,10 @@
   "explanation": "D. The request to terminate the EC2 instance does not originate from the CIDR blocks 192.0.2.0/24 or 203.0.113.0/24.",
   "confident": true,
   "explanation_vi": "Policy chỉ Allow ec2:TerminateInstances khi request đến từ 192.0.2.0/24 hoặc 203.0.113.0/24. Request từ IP khác → không có Allow nào khớp → mặc định Deny → 403 → D. A: EC2 không có resource-based policy. B: identity-based policy gắn vào role thì không cần Principal. C: action đã đúng là TerminateInstances.",
-  "note": "Hình policy bị mất khi trích PDF. Nội dung policy: Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = [192.0.2.0/24, 203.0.113.0/24].",
+  "note": "Nội dung policy: Allow ec2:TerminateInstances, Resource *, Condition IpAddress aws:SourceIp = [192.0.2.0/24, 203.0.113.0/24].",
   "stem_vi": {
-   "tinh_huong": "Admin dùng IAM role terminate EC2 qua CLI bị lỗi 403; đọc policy gắn với role (xem phần bổ sung hình bị mất) để tìm nguyên nhân.",
-   "dich": "Một công ty dùng EC2 cho hệ thống nội bộ. Trong một lần triển khai, admin dùng AWS CLI để terminate một EC2 nhưng nhận lỗi 403 (Access Denied). Admin dùng một IAM role có gắn IAM policy (nội dung xem phần \"Bổ sung phần hình bị mất\"). Nguyên nhân request thất bại là gì?"
+   "tinh_huong": "Admin dùng IAM role terminate EC2 qua CLI bị lỗi 403; đọc policy gắn với role (xem hình) để tìm nguyên nhân.",
+   "dich": "Một công ty dùng EC2 cho hệ thống nội bộ. Trong một lần triển khai, admin dùng AWS CLI để terminate một EC2 nhưng nhận lỗi 403 (Access Denied). Admin dùng một IAM role có gắn IAM policy (nội dung xem ở hình). Nguyên nhân request thất bại là gì?"
   },
   "options_vi": {
    "A": "EC2 instance có resource-based policy chứa câu lệnh Deny.",

@@ -2917,6 +2917,12 @@
   "C": "Tạo IAM policy cấp quyền tối thiểu, gắn policy vào IAM group.",
   "D": "Tạo IAM role, gắn permissions boundary định nghĩa quyền tối đa."
  },
+ "477": {
+  "A": "Allow s3:*Object (mọi action kết thúc bằng Object) trên arn:aws:s3:::bucket-name/*",
+  "B": "Allow s3:* (mọi action S3) trên arn:aws:s3:::bucket-name/*",
+  "C": "Allow s3:DeleteObject trên arn:aws:s3:::bucket-name* (không có dấu /)",
+  "D": "Allow s3:DeleteObject trên arn:aws:s3:::bucket-name/*"
+ },
  "478": {
   "A": "Upload mọi file lên bucket S3 bật static website hosting, cấp quyền IAM chỉ đọc cho mọi principal truy cập bucket tới ngày chỉ định.",
   "B": "Tạo bucket S3 mới bật Versioning, dùng S3 Object Lock với thời hạn lưu giữ tới ngày chỉ định, bật static website hosting, đặt bucket policy cho phép đọc object.",

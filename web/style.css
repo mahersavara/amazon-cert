@@ -163,3 +163,9 @@ button.link { border: 0; background: none; padding: 0 4px; color: var(--accent);
 .timer.low, #qtimer.low { color: var(--bad); }
 .timing { margin: -6px 0 12px 4px; }
 #pauseBtn { flex: 0 0 auto; white-space: nowrap; }
+
+/* question figures: screenshots with white backgrounds, kept white in dark mode */
+.figure img {
+  display: block; max-width: 100%; height: auto; margin: 8px 0;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+}

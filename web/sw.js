@@ -2,7 +2,9 @@
 // export_web.py replaces __VERSION__ with a hash of the site, so each deploy gets a fresh cache.
 const CACHE = "saa-quiz-__VERSION__";
 const FILES = ["./", "index.html", "app.js", "style.css", "data.json", "manifest.webmanifest",
-  "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
+  "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png",
+  // export_web.py lists the question figures (img/*.png) here
+  "__IMAGES__"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));

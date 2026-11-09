@@ -29,7 +29,7 @@ BY_ID = {q["id"]: q for q in QUESTIONS}
 
 class DataTest(unittest.TestCase):
     def test_bank_size(self):
-        self.assertEqual(len(QUESTIONS), 683)
+        self.assertEqual(len(QUESTIONS), 684)
         self.assertEqual(len(BY_ID), len(QUESTIONS), "duplicate ids")
 
     def test_every_question_is_answerable(self):
@@ -154,6 +154,14 @@ class GlossaryTest(unittest.TestCase):
         self.assertLess(len(without), 200)
 
 
+class ImageOptionTest(unittest.TestCase):
+    def test_image_only_options_restored(self):
+        # #477 prints its options only as images; answer_overrides.json transcribes them
+        q = BY_ID[477]
+        self.assertEqual(q["answer"], ["D"])
+        self.assertIn("bucket-name/*", q["options"]["D"])
+
+
 class TopicTest(unittest.TestCase):
     def test_every_service_has_one_topic(self):
         names = [n for *_, ns in TOPICS for n in ns]
@@ -188,6 +196,12 @@ class WebExportTest(unittest.TestCase):
             for path in re.findall(r'"([^"]+)"', sw.split("FILES = [", 1)[1].split("]", 1)[0]):
                 self.assertTrue(path == "./" or (out / path).exists(), path)
             data = json.loads((out / "data.json").read_text(encoding="utf-8"))
+            # Policy screenshots the stems refer to ship with the site and are precached
+            figures = {q["id"]: q["img"] for q in data["questions"] if q["img"]}
+            self.assertEqual(sorted(figures), [96, 253, 423, 429, 477, 494])
+            for src in sum(figures.values(), []):
+                self.assertTrue((out / src).exists(), src)
+                self.assertIn(f'"{src}"', sw)
         qs = data["questions"]
         self.assertEqual(len(qs), len(QUESTIONS))
         for q in qs:
@@ -235,7 +249,7 @@ class CliTest(unittest.TestCase):
 
     def test_lost_image_note_shown_before_answer(self):
         out, _ = self.run_quiz("6\n494\ns\n\nq\nq\n")
-        self.assertLess(out.index("Bổ sung phần hình bị mất"), out.index("Chọn (A-D"))
+        self.assertLess(out.index("Nội dung hình trong đề"), out.index("Chọn (A-D"))
         self.assertIn("203.0.113.0/24", out)
 
     def test_service_note_not_repeated(self):
