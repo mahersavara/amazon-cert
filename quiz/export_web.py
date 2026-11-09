@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from aws_glossary import TOPICS  # noqa: E402
+from aws_glossary import SERVICES, TERMS, TOPICS  # noqa: E402
 from quiz import (load_questions, option_differences, option_reasons,  # noqa: E402
                   requirement_hints, requirement_spans, services_in, suggested_times,
                   terms_in, topics_of, vi_explanation)
@@ -35,10 +35,36 @@ class Table:
         return self.index[key]
 
 
+def appendix(questions):
+    """Glossary for the "Phụ lục" screen: every entry with the ids of questions that use it.
+
+    services: grouped by topic, matched in stem + options; terms: exam vocabulary;
+    hints: requirement phrases matched in the stem (same texts as the "Phân tích đề" card).
+    """
+    full = {q["id"]: q["question"] + "\n" + "\n".join(q["options"].values()) for q in questions}
+    svc_ids, term_ids, hint_ids = {}, {}, {}
+    for q in questions:
+        for name, _ in services_in(full[q["id"]]):
+            svc_ids.setdefault(name, []).append(q["id"])
+        for term, _ in terms_in(full[q["id"]]):
+            term_ids.setdefault(term, []).append(q["id"])
+        for hint in requirement_hints(q["question"]):
+            hint_ids.setdefault(hint, []).append(q["id"])
+    note = {name: n for _, name, n in SERVICES}
+    hints = [h for h in dict.fromkeys(h for q in questions for h in requirement_hints(q["question"]))]
+    return {
+        "services": [{"topic": key, "items": [[n, note[n], svc_ids.get(n, [])] for n in names]}
+                     for key, _, _, names in TOPICS],
+        "terms": [[t, m, term_ids.get(t, [])] for _, t, m in TERMS],
+        "hints": [[h, hint_ids[h]] for h in hints],
+    }
+
+
 def build():
     hints, terms, services = Table(), Table(), Table()
     out = []
-    for q in load_questions():
+    questions = load_questions()
+    for q in questions:
         text = q["question"] + "\n" + "\n".join(q["options"].values())
         common, diff = option_differences(q)
         answer_s, right_s, wrong_s = suggested_times(q)
@@ -78,7 +104,8 @@ def build():
         out.append(item)
     return {"questions": out, "hints": hints.items, "terms": terms.items,
             "services": services.items,
-            "topics": [{"key": k, "label": label, "eg": eg} for k, label, eg, _ in TOPICS]}
+            "topics": [{"key": k, "label": label, "eg": eg} for k, label, eg, _ in TOPICS],
+            "appendix": appendix(questions)}
 
 
 def main():
