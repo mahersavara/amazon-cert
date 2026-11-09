@@ -380,8 +380,8 @@
   "dich": "Một ứng dụng cho nhân viên ở trụ sở công ty truy cập dữ liệu sản phẩm lưu trong DB instance Amazon RDS MySQL. Đội vận hành đã xác định nguyên nhân ứng dụng chậm và muốn tách traffic đọc khỏi traffic ghi. Solutions architect cần tối ưu hiệu năng ứng dụng nhanh chóng. Nên đề xuất gì?"
  },
  "96": {
-  "tinh_huong": "Đọc một IAM policy (gắn cho IAM group) và cho biết tác dụng của nó (xem phần bổ sung hình bị mất).",
-  "dich": "Một admin EC2 tạo policy sau và gắn vào một IAM group có nhiều user (nội dung policy xem ở phần \"Bổ sung phần hình bị mất\"). Tác dụng của policy này là gì?"
+  "tinh_huong": "Đọc một IAM policy (gắn cho IAM group) và cho biết tác dụng của nó (xem hình).",
+  "dich": "Một admin EC2 tạo policy sau và gắn vào một IAM group có nhiều user (nội dung policy xem ở hình). Tác dụng của policy này là gì?"
  },
  "97": {
   "tinh_huong": "SharePoint lớn on-prem cần Windows shared file storage; chuyển lên AWS, cần HA và tích hợp Active Directory để phân quyền.",
@@ -1008,8 +1008,8 @@
   "dich": "Solutions architect cần thiết kế hệ thống lưu hồ sơ vụ việc của khách hàng. Đây là tài sản cốt lõi, rất quan trọng, và số file sẽ tăng dần. File phải được truy cập đồng thời từ nhiều application server chạy trên EC2. Giải pháp phải có sẵn khả năng dự phòng. Giải pháp nào đáp ứng yêu cầu?"
  },
  "253": {
-  "tinh_huong": "Hai policy (xem phần bổ sung hình bị mất) gắn vào một IAM group; user trong group làm được hành động nào.",
-  "dich": "Solutions architect tạo hai IAM policy là Policy1 và Policy2 (nội dung xem phần \"Bổ sung phần hình bị mất\"), cả hai gắn vào một IAM group. Một kỹ sư cloud được thêm vào group dưới dạng IAM user. Kỹ sư này thực hiện được hành động nào?"
+  "tinh_huong": "Hai policy (xem hình) gắn vào một IAM group; user trong group làm được hành động nào.",
+  "dich": "Solutions architect tạo hai IAM policy là Policy1 và Policy2 (nội dung xem ở hình), cả hai gắn vào một IAM group. Một kỹ sư cloud được thêm vào group dưới dạng IAM user. Kỹ sư này thực hiện được hành động nào?"
  },
  "254": {
   "tinh_huong": "Sau khi migrate app 3 tầng vào VPC, rule security group giữa các tầng chưa theo least privilege.",
@@ -1688,8 +1688,8 @@
   "dich": "Một công ty phát triển giải pháp mô hình học máy (ML) trên AWS. Mỗi mô hình là một microservice độc lập, khi khởi động tải khoảng 1 GB dữ liệu mô hình từ Amazon S3 vào bộ nhớ. Người dùng truy cập qua một API bất đồng bộ, gửi một hoặc một loạt request và chỉ định nơi nhận kết quả. Công ty phục vụ hàng trăm người dùng, mức dùng thất thường: có mô hình không ai dùng nhiều ngày hoặc nhiều tuần, có mô hình nhận cả nghìn request một lúc. Solutions architect nên đề xuất thiết kế nào?"
  },
  "423": {
-  "tinh_huong": "Có một identity-based policy (hình JSON bị mất); hỏi gắn được policy này vào loại IAM principal nào.",
-  "dich": "Solutions architect muốn dùng đoạn JSON sau làm identity-based policy để cấp quyền (nội dung JSON bị mất khi trích PDF, không cần để trả lời). Có thể gắn policy này vào những IAM principal nào? (Chọn hai.)"
+  "tinh_huong": "Có một identity-based policy (JSON trong hình); hỏi gắn được policy này vào loại IAM principal nào.",
+  "dich": "Solutions architect muốn dùng đoạn JSON sau làm identity-based policy để cấp quyền (nội dung JSON ở hình, không cần để trả lời). Có thể gắn policy này vào những IAM principal nào? (Chọn hai.)"
  },
  "424": {
   "tinh_huong": "Frontend chạy 24/7, backend chạy ngắn theo tải và số node thay đổi trong ngày; cần scale theo tải, rẻ NHẤT.",
@@ -1712,8 +1712,8 @@
   "dich": "Một ứng dụng serverless dùng Amazon API Gateway, AWS Lambda và Amazon DynamoDB. Lambda cần quyền đọc và ghi bảng DynamoDB. Giải pháp nào cấp quyền cho Lambda AN TOÀN NHẤT?"
  },
  "429": {
-  "tinh_huong": "Đọc IAM policy duy nhất gắn vào group (xem phần bổ sung hình bị mất) và cho biết quyền thực tế của thành viên.",
-  "dich": "IAM policy sau được gắn vào một IAM group và là policy duy nhất của group (nội dung xem phần \"Bổ sung phần hình bị mất\"). Quyền thực tế của thành viên group theo policy này là gì?"
+  "tinh_huong": "Đọc IAM policy duy nhất gắn vào group (xem hình) và cho biết quyền thực tế của thành viên.",
+  "dich": "IAM policy sau được gắn vào một IAM group và là policy duy nhất của group (nội dung xem ở hình). Quyền thực tế của thành viên group theo policy này là gì?"
  },
  "430": {
   "tinh_huong": "Cảm biến upload CSV lên S3; phải chuyển thành ảnh càng sớm càng tốt; ảnh hết giá trị sau 1 tháng; CSV giữ để train ML 2 lần/năm (lên kế hoạch trước nhiều tuần); rẻ NHẤT.",
@@ -1903,6 +1903,10 @@
   "tinh_huong": "Đã tạo IAM group theo phòng ban cho user mới; cách AN TOÀN NHẤT để cấp quyền.",
   "dich": "Một công ty dự kiến tăng trưởng nhanh. Solutions architect cần cấu hình user hiện có và cấp quyền cho user mới trên AWS, đã quyết định tạo IAM group và thêm user mới vào group theo phòng ban. Hành động bổ sung nào là cách AN TOÀN NHẤT để cấp quyền cho user mới?"
  },
+ "477": {
+  "tinh_huong": "Group cần list bucket S3 và xóa object, nhưng policy hiện tại không xóa được object. Thêm statement nào theo least-privilege?",
+  "dich": "Một group cần quyền list một bucket Amazon S3 và xóa object trong bucket đó. Admin đã tạo IAM policy sau để cấp quyền truy cập bucket và gắn policy cho group. Group không xóa được object trong bucket. Công ty tuân theo nguyên tắc least-privilege. Solutions architect nên thêm statement nào vào policy để sửa quyền truy cập bucket?"
+ },
  "478": {
   "tinh_huong": "Hãng luật công bố hàng trăm file cho công chúng đọc; không ai được sửa/xóa trước một ngày định trước; AN TOÀN NHẤT.",
   "dich": "Một công ty luật cần chia sẻ thông tin với công chúng, gồm hàng trăm file phải đọc được công khai. Cấm mọi người sửa hoặc xóa file trước một ngày định trước trong tương lai. Giải pháp nào AN TOÀN NHẤT?"
@@ -1968,8 +1972,8 @@
   "dich": "Một công ty muốn dùng AI để đánh giá chất lượng các cuộc gọi chăm sóc khách hàng. Hiện có bốn ngôn ngữ, gồm tiếng Anh, và sẽ thêm ngôn ngữ mới. Công ty không có nguồn lực để thường xuyên bảo trì mô hình học máy (ML). Công ty cần tạo báo cáo phân tích cảm xúc bằng văn bản từ file ghi âm, và văn bản phải được dịch sang tiếng Anh. Kết hợp bước nào đáp ứng yêu cầu? (Chọn ba.)"
  },
  "494": {
-  "tinh_huong": "Admin dùng IAM role terminate EC2 qua CLI bị lỗi 403; đọc policy gắn với role (xem phần bổ sung hình bị mất) để tìm nguyên nhân.",
-  "dich": "Một công ty dùng EC2 cho hệ thống nội bộ. Trong một lần triển khai, admin dùng AWS CLI để terminate một EC2 nhưng nhận lỗi 403 (Access Denied). Admin dùng một IAM role có gắn IAM policy (nội dung xem phần \"Bổ sung phần hình bị mất\"). Nguyên nhân request thất bại là gì?"
+  "tinh_huong": "Admin dùng IAM role terminate EC2 qua CLI bị lỗi 403; đọc policy gắn với role (xem hình) để tìm nguyên nhân.",
+  "dich": "Một công ty dùng EC2 cho hệ thống nội bộ. Trong một lần triển khai, admin dùng AWS CLI để terminate một EC2 nhưng nhận lỗi 403 (Access Denied). Admin dùng một IAM role có gắn IAM policy (nội dung xem ở hình). Nguyên nhân request thất bại là gì?"
  },
  "495": {
   "tinh_huong": "Kiểm toán nội bộ: tìm PII và thông tin tài chính (số hộ chiếu, số thẻ tín dụng) trong bucket S3 của data lake.",

@@ -492,5 +492,18 @@
    "C"
   ],
   "explanation": "Truy cập S3 không qua internet từ cả trong Region lẫn từ on-prem (qua Direct Connect) → interface endpoint cho S3 (PrivateLink): có IP private trong VPC nên on-prem gọi được qua Direct Connect. A (đáp án của file nguồn): gateway endpoint chỉ dùng được bên trong VPC, traffic từ on-prem đi qua Direct Connect không dùng được gateway endpoint. Giải thích của nguồn nói interface endpoint không dành cho S3 là sai: S3 hỗ trợ interface endpoint từ năm 2021. B: Transit Gateway không kết nối tới S3. D: KMS là mã hóa, không phải đường mạng."
+ },
+ "477": {
+  "answer": [
+   "D"
+  ],
+  "question": "A group requires permissions to list an Amazon S3 bucket and delete objects from that bucket. An administrator has created the following IAM policy to provide access to the bucket and applied that policy to the group. The group is not able to delete objects in the bucket. The company follows least-privilege access rules. Which statement should a solutions architect add to the policy to correct bucket access?",
+  "options": {
+   "A": "\"Action\": [\"s3:*Object\"], \"Resource\": [\"arn:aws:s3:::bucket-name/*\"], \"Effect\": \"Allow\"",
+   "B": "\"Action\": [\"s3:*\"], \"Resource\": [\"arn:aws:s3:::bucket-name/*\"], \"Effect\": \"Allow\"",
+   "C": "\"Action\": [\"s3:DeleteObject\"], \"Resource\": [\"arn:aws:s3:::bucket-name*\"], \"Effect\": \"Allow\"",
+   "D": "\"Action\": [\"s3:DeleteObject\"], \"Resource\": [\"arn:aws:s3:::bucket-name/*\"], \"Effect\": \"Allow\""
+  },
+  "explanation": "s3:ListBucket áp lên bucket (arn:aws:s3:::bucket-name), còn s3:DeleteObject áp lên object (arn:aws:s3:::bucket-name/*). Policy hiện tại chỉ có ARN của bucket nên DeleteObject không khớp object nào → thêm statement Allow s3:DeleteObject trên bucket-name/* → D. A: s3:*Object cho cả GetObject, PutObject… thừa quyền. B: s3:* thừa quyền nhất. C: bucket-name* khớp cả các bucket khác tên bắt đầu bằng bucket-name (vd bucket-name-prod), sai least-privilege."
  }
 }

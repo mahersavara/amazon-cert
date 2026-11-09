@@ -51,6 +51,8 @@ def build():
             "tm": [answer_s, right_s, wrong_s],
             # Study topics (keys of "topics") for "Luyện theo chủ đề"
             "tp": topics_of(q),
+            # Figures from the PDF (policy screenshots), saved by extract_images.py
+            "img": [f"img/{f.name}" for f in sorted((WEB / "img").glob(f"q{q['id']}-*.png"))],
             "t": [terms.add(list(t)) for t in terms_in(text)],
             "s": [services.add(list(s)) for s in services_in(q["question"])],
             "os": {k: [services.add(list(s)) for s in services_in(v)]
@@ -86,6 +88,11 @@ def main():
     data = build()
     (dest / "data.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")),
                                     encoding="utf-8")
+    # Figures are precached too, so image questions still read offline
+    sw = dest / "sw.js"
+    figures = sorted(f"img/{f.name}" for f in (dest / "img").glob("*.png"))
+    sw.write_text(sw.read_text(encoding="utf-8").replace(
+        '"__IMAGES__"', ", ".join(f'"{f}"' for f in figures)), encoding="utf-8")
     # A content hash names the service worker cache, so every change reaches offline users
     digest = hashlib.sha256()
     for f in sorted(dest.rglob("*")):
