@@ -86,6 +86,7 @@ function saveProgress() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(progress));
   } catch (e) { /* private mode or storage blocked: progress lasts for this tab only */ }
+  schedulePush();
 }
 
 function record(qid, correct, seconds) {
@@ -150,6 +151,7 @@ function home() {
         <button data-go="stats">Mở</button></div>
     </div>
     <p class="small" id="offline">${offlineText()}</p>
+    ${syncConf() ? `<p class="small" data-sync-status>${esc(syncState.status)}</p>` : ""}
     <p class="muted small">Phím tắt trên máy tính: A–F hoặc 1–6 chọn, Enter trả lời / câu tiếp, ← câu trước, V dịch đề, K từ khóa,
     H so sánh đáp án, R làm mới, S bỏ qua, Q về menu.</p>`);
   app.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => startMode(b.dataset.go)));
@@ -768,17 +770,212 @@ function stats() {
       <div class="stat"><b>${wrongNow}</b>Đang sai</div>
       <div class="stat"><b>${avgTime}</b>Thời gian TB/câu (thi thật ~2:00)</div>
     </div>
-    <p class="muted small">Tiến độ chỉ lưu trên trình duyệt này; điện thoại và máy tính có tiến độ riêng.</p>
+    ${syncCard()}
     ${bottomBar('<button id="resetBtn">Xóa tiến độ</button><button class="primary" id="homeBtn">Về menu</button>')}`);
   document.getElementById("homeBtn").addEventListener("click", home);
   document.getElementById("resetBtn").addEventListener("click", () => {
-    if (confirm("Xóa toàn bộ tiến độ?")) {
+    const where = syncConf() ? " trên mọi máy đang đồng bộ" : "";
+    if (confirm(`Xóa toàn bộ tiến độ${where}?`)) {
       progress = {};
+      setResetAt(Date.now());
       saveProgress();
+      syncNow();
       stats();
     }
   });
+  bindSyncCard();
 }
+
+// ---------- cloud sync (GitHub Gist) ----------
+// Progress lives in this browser's localStorage. With a GitHub token (classic, "gist" scope
+// only) it is also kept in one secret gist and merged both ways, so every browser and
+// computer shows the same stats. Per question the record with more attempts wins, so
+// practising on two machines in turn loses nothing. "Xóa tiến độ" stamps resetAt; a newer
+// reset on either side drops the older side's records.
+
+const GIST_FILE = "saa-quiz-progress.json";
+const SYNC_KEY = "saa-quiz-sync"; // {token, gist}
+const TOKEN_URL = "https://github.com/settings/tokens/new?scopes=gist&description=SAA-C03%20quiz%20sync";
+const syncState = { status: "", timer: null, queue: Promise.resolve() };
+
+function syncConf() {
+  try {
+    return JSON.parse(localStorage.getItem(SYNC_KEY)) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setSyncConf(conf) {
+  try {
+    if (conf) localStorage.setItem(SYNC_KEY, JSON.stringify(conf));
+    else localStorage.removeItem(SYNC_KEY);
+  } catch (e) { /* storage blocked: sync stays off */ }
+}
+
+function resetAt() {
+  try {
+    return Number(localStorage.getItem("saa-quiz-reset-at")) || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function setResetAt(ts) {
+  try { localStorage.setItem("saa-quiz-reset-at", String(ts)); } catch (e) { /* ignore */ }
+}
+
+async function github(path, token, options = {}) {
+  const res = await fetch("https://api.github.com" + path, {
+    ...options,
+    headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${token}`,
+      ...(options.body ? { "Content-Type": "application/json" } : {}) },
+  });
+  if (res.status === 401) throw new Error("token sai hoặc đã hết hạn");
+  if (res.status === 403 || res.status === 404) throw new Error("token thiếu quyền gist hoặc gist đã bị xóa");
+  if (!res.ok) throw new Error(`GitHub trả lỗi ${res.status}`);
+  return res.json();
+}
+
+// What this browser holds, in the shape stored in the gist
+const snapshot = () => ({ version: 1, progress, seq: lastSeq(), resetAt: resetAt() });
+
+// Folds the gist's copy into local progress; returns true when local records changed
+function mergeRemote(remote) {
+  const before = JSON.stringify(progress);
+  const remoteReset = Number(remote.resetAt) || 0;
+  if (remoteReset > resetAt()) {
+    progress = {}; // reset on another machine: records made here before it are dropped
+    setResetAt(remoteReset);
+  }
+  if (remoteReset >= resetAt()) {
+    for (const [id, p] of Object.entries(remote.progress || {})) {
+      const mine = progress[id];
+      if (p && (!mine || (p.attempts || 0) > (mine.attempts || 0))) progress[id] = p;
+    }
+  }
+  const seq = Math.max(parseInt(lastSeq(), 10) || 1, parseInt(remote.seq, 10) || 1);
+  try { localStorage.setItem("saa-quiz-seq", String(seq)); } catch (e) { /* ignore */ }
+  return JSON.stringify(progress) !== before;
+}
+
+function setSyncStatus(text) {
+  syncState.status = text;
+  document.querySelectorAll("[data-sync-status]").forEach((el) => { el.textContent = text; });
+}
+
+// Pull, merge, push back if the gist is behind. Runs one at a time.
+function syncNow() {
+  const conf = syncConf();
+  if (!conf || !conf.gist) return Promise.resolve();
+  clearTimeout(syncState.timer);
+  syncState.timer = null;
+  syncState.queue = syncState.queue.then(async () => {
+    try {
+      setSyncStatus("⏳ Đang đồng bộ…");
+      const gist = await github(`/gists/${conf.gist}`, conf.token);
+      const file = gist.files[GIST_FILE];
+      let remote = {};
+      if (file) {
+        const text = file.truncated ? await (await fetch(file.raw_url)).text() : file.content;
+        try { remote = JSON.parse(text || "{}"); } catch (e) { remote = {}; }
+      }
+      const changed = mergeRemote(remote);
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) { /* ignore */ }
+      const mine = snapshot();
+      const same = ["progress", "seq", "resetAt"].every((k) => JSON.stringify(mine[k]) === JSON.stringify(remote[k]));
+      if (!same) {
+        await github(`/gists/${conf.gist}`, conf.token, {
+          method: "PATCH", body: JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(mine) } } }),
+        });
+      }
+      const at = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+      setSyncStatus(`☁️ Đã đồng bộ lúc ${at}`);
+      // New records from another machine: refresh the menu counts if nothing is in progress
+      if (changed && !session && document.getElementById("offline")) home();
+    } catch (e) {
+      setSyncStatus(`⚠ Chưa đồng bộ được: ${e.message}. Sẽ thử lại lần sau.`);
+    }
+  });
+  return syncState.queue;
+}
+
+// Answers arrive one by one: push a few seconds after the last one, not after each
+function schedulePush() {
+  if (!syncConf()) return;
+  clearTimeout(syncState.timer);
+  syncState.timer = setTimeout(syncNow, 5000);
+}
+
+// Finds this user's progress gist, or creates a secret one, then syncs
+async function connectSync(token) {
+  const gists = await github("/gists?per_page=100", token);
+  let found = gists.find((g) => g.files && g.files[GIST_FILE]);
+  if (!found) {
+    found = await github("/gists", token, {
+      method: "POST",
+      body: JSON.stringify({ description: "Tiến độ luyện thi SAA-C03 (đồng bộ tự động)", public: false,
+        files: { [GIST_FILE]: { content: JSON.stringify(snapshot()) } } }),
+    });
+  }
+  setSyncConf({ token, gist: found.id });
+  await syncNow();
+}
+
+function syncCard() {
+  const conf = syncConf();
+  if (conf) {
+    return `<div class="card"><h2>☁️ Đồng bộ giữa các máy</h2>
+      <p class="small" data-sync-status>${esc(syncState.status || "Đã kết nối.")}</p>
+      <p class="small muted">Tiến độ lưu ở <a href="https://gist.github.com/${esc(conf.gist)}" target="_blank" rel="noopener">gist riêng</a>
+      của bạn, tự đồng bộ khi mở app và vài giây sau mỗi câu trả lời.</p>
+      <div class="toolbar"><button id="syncNowBtn">Đồng bộ ngay</button><button id="syncOffBtn">Ngắt trên máy này</button></div></div>`;
+  }
+  return `<div class="card"><h2>☁️ Đồng bộ giữa các máy</h2>
+    <p class="small muted">Hiện tiến độ chỉ nằm trên trình duyệt này. Để mở máy khác vẫn thấy:</p>
+    <ol class="small">
+      <li><a href="${TOKEN_URL}" target="_blank" rel="noopener">Tạo GitHub token</a> (classic, chỉ tích quyền <b>gist</b>, chọn hạn dùng tùy ý) rồi copy.</li>
+      <li>Dán vào ô dưới, bấm Kết nối. Làm lại bước này với cùng token trên mỗi máy/trình duyệt.</li>
+    </ol>
+    <div class="row sync-form"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…">
+      <button class="primary" id="syncOnBtn">Kết nối</button></div>
+    <p class="small" data-sync-status>${esc(syncState.status)}</p>
+    <p class="small muted">Token chỉ lưu trên trình duyệt này và chỉ gửi tới GitHub. Gist để chế độ secret: không ai tìm thấy, nhưng ai có link vẫn xem được tiến độ (không có dữ liệu cá nhân).</p></div>`;
+}
+
+function bindSyncCard() {
+  const on = document.getElementById("syncOnBtn");
+  if (on) {
+    on.addEventListener("click", async () => {
+      const token = document.getElementById("syncToken").value.trim();
+      if (!token) return;
+      on.disabled = true;
+      setSyncStatus("⏳ Đang kết nối…");
+      try {
+        await connectSync(token);
+        stats();
+      } catch (e) {
+        setSyncConf(null);
+        setSyncStatus(`⚠ Không kết nối được: ${e.message}`);
+        on.disabled = false;
+      }
+    });
+    return;
+  }
+  document.getElementById("syncNowBtn").addEventListener("click", () => syncNow().then(() => { if (!session) stats(); }));
+  document.getElementById("syncOffBtn").addEventListener("click", () => {
+    if (!confirm("Ngắt đồng bộ trên máy này? Tiến độ ở đây vẫn giữ, gist không bị xóa.")) return;
+    setSyncConf(null);
+    setSyncStatus("");
+    stats();
+  });
+}
+
+// Pull what other machines did whenever the app comes back to the foreground
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") syncNow();
+  else if (syncState.timer) syncNow(); // leaving with answers not yet pushed
+});
 
 // ---------- keyboard ----------
 
@@ -844,6 +1041,7 @@ fetch("data.json")
     DATA = d;
     BY_ID = Object.fromEntries(d.questions.map((q) => [q.id, q]));
     home();
+    syncNow();
   })
   .catch((err) => {
     app.innerHTML = `<p>Không tải được câu hỏi (${esc(err.message)}). Thử tải lại trang.</p>`;
