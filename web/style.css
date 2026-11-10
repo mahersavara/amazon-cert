@@ -183,3 +183,13 @@ button.link { border: 0; background: none; padding: 0 4px; color: var(--accent);
 .gl-item > div { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .gl-item button { flex: none; padding: 5px 10px; }
 [hidden] { display: none !important; }
+
+/* sync: token field + connect button */
+.sync-form { gap: 8px; }
+.sync-form input {
+  flex: 1; min-width: 0; padding: 8px; font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+}
+
+/* links (sync card, gist link) readable in both themes */
+a { color: var(--accent); }
